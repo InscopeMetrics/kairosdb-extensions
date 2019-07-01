@@ -17,7 +17,7 @@ env:
   - secure: cQPFNa1t1f37Hnlw7QhqaxxsaFWKmKIR8FMftzIxjUJkb2EqJBB0eAgf1hIJAReDoWFPj8YUJEJJQ+sT/S8I5XYf9XzUCQnfJIJsw09MaMl47NWeLx13Bvx+qTiTxei8R+qkho1Hzizx7Pie1shvEDz2vsaARb9wFZyDQOfSx5cbY4L6uUwmmHmKsubQBPyXXFujmKj9epo+NC8QfMKj3WL2zqrRTOnOR/HQnu5Tzz+nSVQiH2FJBRMtKEnOpEkuKf79zKgmeiGmaMu1YKbhuDGmUyn0LIflOczylAA9qVAxI5SP3yAqbDCc6oZqd9BCZe42xEu4qf7MBFYtgML3qs0TMn5esmXzZleI5QH42i8PA1uP7og0tvDvTT34NUjHb8PKWnDmjQ7+I7KU80TA/zViBIjXBBsV1cwxUMlNpDYaxdNeiiZPV5LYRJHho7/0DDLhKFVOXk9Xk46POVHUl4YEEYrrFWrZXa9z3taQSea2xgotHC25X2/jlCTZZMPTSoTwVcsNUmhvj/TlaHgL6S6MOeUWOvERyuquQITtU58XTar3/H2/RHzIuMsmll88sf3AVZO9R6UPlMazW2HOGNktAucyzrQp3Dmh94C22k7QWCwRUjyi8I1p4nDwuWJkFh5yF3TI3I/JfOVbCaoWMcmeVZZarSeF4/7Lp0j+7+8=
 install: true
 before_script:
-- gpg --import arpnetworking.key
+- gpg --import ism.key
 - if [ \( -n "${TRAVIS_TAG}" \) -a  "${TRAVIS_PULL_REQUEST}" = "false" ]; then export TARGET="deploy -P release --settings settings.xml"; fi;
 script:
 - ./jdk-wrapper.sh ./mvnw clean ${TARGET} -P rpm -U -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
@@ -26,10 +26,10 @@ deploy:
   api_key:
     secure: rajBgPaGqNyf/uIVu7Ov8DEUzR6zijPQIEmwxjv+jP0AwQojDHsZAx1RPDL0EVymQcOIcccrShZXc7ozUH0F7/ffGU8syWbZG/6gvAN7ISbAI5Rx85j3T4OkFUP0/VxABbKU/oolKYIwFxyZZkUVq1SB8sxutu5+NjCXsT/t6xsJLR+opW6dVOVVwyMbXpiKQTidj718EJPafwLgwQnk52Tamx09jPRvDod+qq0YW8N7z2q04L+HHFhqjKCqMLTnSZG1QRzS+bXgKWHfYaT68+zpVs0mLmKsecGK9nIr+Sd+nhG6omRrb9AJSLXeTN6PokR5Trhb+aRAB5Gv+X7cCuNYixTB/Le0cD4YxEvN5wCE8DH8iVDfgRzv8f0IEKFSq8YcEUvTGj+U8/a6vs/p1gI8SnRpnC0l3kljVJXWSZwaEdw1wGdsCzbN25uPBEV5WgfGQKfMuPts2tDpyQ7dirkI1ZpGXyogAVTXYWdfvQ8lt4rM10b8Y0lF+pcJ8wbrdqW68Wp/WhbX9cXu0tVSbbWSEsJkJSXDoRxHtC74G8PGm8/vmG0s4Hrpub/2oNSSPlARYQmygqZ9MNJPR0F7izU7VvwxwppNEvFI+ruikoZx/RYvIolaPXarkqnqujDNL54uVrRSXjfumQ6Aef9A2k5Hr18Akbc/zHpJSpua2GY=
   file:
-    - target/rpm/kairosdb-histograms/RPMS/noarch/kairosdb-histograms*.rpm
-    - target/kairosdb-histograms*-bin.tgz
+    - target/rpm/kairosdb-extensions/RPMS/noarch/kairosdb-extensions*.rpm
+    - target/kairosdb-extensions*-bin.tgz
   file_glob: true
   skip_cleanup: true
   on:
-    repo: ArpNetworking/kairosdb-histograms
+    repo: InscopeMetrics/kairosdb-extensions
     tags: true

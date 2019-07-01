@@ -63,9 +63,9 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git@github.com:ArpNetworking/kairosdb-histograms.git</connection>
-    <developerConnection>scm:git:git@github.com:ArpNetworking/kairosdb-histograms.git</developerConnection>
-    <url>https://github.com/arpnetworking/kairosdb-histograms</url>
+    <connection>scm:git:git@github.com:InscopeMetrics/kairosdb-extensions.git</connection>
+    <developerConnection>scm:git:git@github.com:InscopeMetrics/kairosdb-extensions.git</developerConnection>
+    <url>https://github.com/inscopemetrics/kairosdb-extensions</url>
     <tag>HEAD</tag>
   </scm>
 
