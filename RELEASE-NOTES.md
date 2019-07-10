@@ -5,7 +5,7 @@ KairosDb Extensions Release Notes
 ------------------------
 * _TBD_
 
-2.1.5 - July 8, 2019
+2.1.7 - July 9, 2019
 ------------------------
 * Initial release to `io.inscopemetrics.kairosdb`
 
