@@ -55,14 +55,17 @@ public class HistogramDataPointFactory implements DataPointFactory {
         final TreeMap<Double, Integer> binValues = new TreeMap<>();
 
         final JsonObject object = json.getAsJsonObject();
-        final double min = object.get("min").getAsDouble();
-        final double max = object.get("max").getAsDouble();
-        final double mean = object.get("mean").getAsDouble();
-        final double sum = object.get("sum").getAsDouble();
+        final double min = getFiniteDouble(object, "min");
+        final double max = getFiniteDouble(object, "max");
+        final double mean = getFiniteDouble(object, "mean");
+        final double sum = getFiniteDouble(object, "sum");
         final JsonObject bins = object.get("bins").getAsJsonObject();
 
         for (Map.Entry<String, JsonElement> entry : bins.entrySet()) {
-            binValues.put(Double.parseDouble(entry.getKey()), entry.getValue().getAsInt());
+            binValues.put(
+                    ensureFinite(Double.parseDouble(entry.getKey()), "bucket"),
+                    entry.getValue().getAsInt()
+            );
         }
 
         return new HistogramDataPointImpl(timestamp, binValues, min, max, mean, sum);
@@ -73,14 +76,28 @@ public class HistogramDataPointFactory implements DataPointFactory {
         final TreeMap<Double, Integer> bins = new TreeMap<>();
         final int binCount = buffer.readInt();
         for (int i = 0; i < binCount; i++) {
-            bins.put(buffer.readDouble(), buffer.readInt());
+            bins.put(
+                    ensureFinite(buffer.readDouble(), "bucket"),
+                    buffer.readInt()
+            );
         }
 
-        final double min = buffer.readDouble();
-        final double max = buffer.readDouble();
-        final double mean = buffer.readDouble();
-        final double sum = buffer.readDouble();
+        final double min = ensureFinite(buffer.readDouble(), "min");
+        final double max = ensureFinite(buffer.readDouble(), "max");
+        final double mean = ensureFinite(buffer.readDouble(), "mean");
+        final double sum = ensureFinite(buffer.readDouble(), "sum");
 
         return new HistogramDataPointImpl(timestamp, bins, min, max, mean, sum);
+    }
+
+    private double ensureFinite(final double x, final String name) {
+        if (!Double.isFinite(x)) {
+            throw new IllegalArgumentException(String.format("%s has non-finite value %s", name, Double.toString(x)));
+        }
+        return x;
+    }
+
+    private double getFiniteDouble(final JsonObject object, final String key) {
+        return ensureFinite(object.get(key).getAsDouble(), key);
     }
 }

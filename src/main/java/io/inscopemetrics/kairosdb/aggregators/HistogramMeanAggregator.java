@@ -78,6 +78,9 @@ public final class HistogramMeanAggregator extends RangeAggregator {
                 }
             }
 
+            if (count == 0) {
+                return Collections.emptyList();
+            }
             return Collections.singletonList(dataPointFactory.createDataPoint(returnTime, sum / count));
         }
     }
