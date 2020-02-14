@@ -225,7 +225,7 @@ public final class AggregationIT {
     public void testMergeAggregatorMulti() throws IOException, JSONException {
         final List<Double> numbers = Lists.newArrayList();
         for (Histogram histogram : MULTI_HIST_TEST_DATA) {
-            for (final Map.Entry<Double, Integer> entry : histogram.getBins().entrySet()) {
+            for (final Map.Entry<Double, Long> entry : histogram.getBins().entrySet()) {
                 for (int count = 0; count < entry.getValue(); count++) {
                     numbers.add(entry.getKey());
                 }
