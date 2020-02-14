@@ -68,7 +68,7 @@ public final class HistogramCountAggregator extends RangeAggregator {
 
         @Override
         public Iterable<DataPoint> getNextDataPoints(final long returnTime, final Iterator<DataPoint> dataPointRange) {
-            int count = 0;
+            long count = 0;
             while (dataPointRange.hasNext()) {
                 final DataPoint dp = dataPointRange.next();
                 if (dp instanceof HistogramDataPoint) {
