@@ -207,7 +207,7 @@ public class HistogramFilterAggregator implements Aggregator {
             double max = -Double.MAX_VALUE;
             double sum = 0;
             long count = 0;
-            int originalCount = 0;
+            long originalCount = 0;
 
             if (dp instanceof HistogramDataPoint) {
                 final HistogramDataPoint hist = (HistogramDataPoint) dp;
