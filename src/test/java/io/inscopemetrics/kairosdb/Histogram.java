@@ -31,11 +31,11 @@ import java.util.TreeMap;
  */
 @SuppressFBWarnings("FE_FLOATING_POINT_EQUALITY")
 public class Histogram {
-    private final TreeMap<Double, Integer> bins = new TreeMap<>();
+    private final TreeMap<Double, Long> bins = new TreeMap<>();
     private double min;
     private double max;
     private double sum;
-    private int count;
+    private long count;
 
     /**
      * Public constructor.
@@ -70,7 +70,7 @@ public class Histogram {
         final JSONObject binsJson = json.getJSONObject("bins");
         for (final Iterator<String> it = (Iterator<String>) binsJson.keys(); it.hasNext();) {
             final String key = it.next();
-            final int value = binsJson.getInt(key);
+            final long value = binsJson.getLong(key);
             bins.put(Double.valueOf(key), value);
             count += value;
 
@@ -143,7 +143,11 @@ public class Histogram {
         return sum;
     }
 
-    public TreeMap<Double, Integer> getBins() {
+    public long getCount() {
+        return count;
+    }
+
+    public TreeMap<Double, Long> getBins() {
         return bins;
     }
 }
