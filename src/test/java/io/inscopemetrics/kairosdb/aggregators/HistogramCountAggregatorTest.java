@@ -35,12 +35,12 @@ public class HistogramCountAggregatorTest {
     public void testCombineLargeValues() throws KairosDBException {
         final double min = Double.MAX_VALUE;
         final double max = -Double.MAX_VALUE;
-        double sum = 0;
+        final double sum = 0;
         final TreeMap<Double, Integer> bins = Maps.newTreeMap();
         bins.put(1337d, 2147483647);
         final double mean =  1337d;
 
-        HistogramDataPoint dp = new HistogramDataPointImpl(
+        final HistogramDataPoint dp = new HistogramDataPointImpl(
                 1L, bins,  min, max, mean, sum);
         final ListDataPointGroup group = new ListDataPointGroup("testCombineLargeValues");
         group.addDataPoint(dp);
@@ -48,11 +48,11 @@ public class HistogramCountAggregatorTest {
         group.addDataPoint(dp);
         group.addDataPoint(dp);
 
-        final HistogramCountAggregator aggregator= new HistogramCountAggregator(new DoubleDataPointFactoryImpl());
-        DataPointGroup result = aggregator.aggregate(group);
+        final HistogramCountAggregator aggregator = new HistogramCountAggregator(new DoubleDataPointFactoryImpl());
+        final DataPointGroup result = aggregator.aggregate(group);
 
         Assert.assertTrue(result.hasNext());
         final DoubleDataPoint resultDataPoint = (DoubleDataPoint) result.next();
-        Assert.assertEquals(8589934588L,resultDataPoint.getLongValue());
+        Assert.assertEquals(8589934588L, resultDataPoint.getLongValue());
     }
 }
