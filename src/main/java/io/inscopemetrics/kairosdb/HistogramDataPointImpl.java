@@ -41,7 +41,7 @@ public class HistogramDataPointImpl extends DataPointHelper implements Histogram
     private final double max;
     private final double mean;
     private final double sum;
-    private final int originalCount;
+    private final long originalCount;
 
     /**
      * Public constructor.
@@ -88,7 +88,7 @@ public class HistogramDataPointImpl extends DataPointHelper implements Histogram
             final double max,
             final double mean,
             final double sum,
-            final int originalCount) {
+            final long originalCount) {
         this(
                 timestamp,
                 DEFAULT_PRECISION,
@@ -151,7 +151,7 @@ public class HistogramDataPointImpl extends DataPointHelper implements Histogram
             final double max,
             final double mean,
             final double sum,
-            final int originalCount) {
+            final long originalCount) {
         super(timestamp);
         this.precision = precision;
         this.map = map;
@@ -222,7 +222,7 @@ public class HistogramDataPointImpl extends DataPointHelper implements Histogram
     }
 
     @Override
-    public int getOriginalCount() {
+    public long getOriginalCount() {
         return originalCount;
     }
 
@@ -232,7 +232,7 @@ public class HistogramDataPointImpl extends DataPointHelper implements Histogram
      * @return the number of samples
      */
     @Override
-    public int getSampleCount() {
+    public long getSampleCount() {
         int count = 0;
         for (Integer binSamples : map.values()) {
             count += binSamples;
