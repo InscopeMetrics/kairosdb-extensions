@@ -233,7 +233,7 @@ public class HistogramDataPointImpl extends DataPointHelper implements Histogram
      */
     @Override
     public long getSampleCount() {
-        int count = 0;
+        long count = 0;
         for (Integer binSamples : map.values()) {
             count += binSamples;
         }
