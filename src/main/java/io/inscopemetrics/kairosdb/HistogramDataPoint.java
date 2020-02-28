@@ -25,6 +25,8 @@ import java.util.NavigableMap;
  * @author Gil Markham (gmarkham at dropbox dot com)
  */
 public interface HistogramDataPoint extends DataPoint {
+
+
     /**
      * Getter the number of data points originally contained in this HistogramDataPoint.
      * @return datapoint sample count
@@ -56,8 +58,36 @@ public interface HistogramDataPoint extends DataPoint {
     double getMax();
 
     /**
+     * Getter for the precision value of the samples contained in this HistogramDataPoint.
+     * @return precision in bits
+     */
+    int getPrecision();
+
+    /**
      * Getter for the map of lower bucket value to sample count contained in this HistogramDataPoint.
      * @return map of histogram buckets
      */
     NavigableMap<Double, Integer> getMap();
+
+    /**
+     * Truncates a value to the specified bits of precision.
+     * @param val value to truncate
+     * @param precision bits of precision
+     * @return truncated value
+     */
+    static double truncate(final double val, final int precision) {
+        return Double.longBitsToDouble(truncateLong(Double.doubleToRawLongBits(val), precision));
+    }
+
+    /**
+     * Truncates a value to the specified bits of precision.
+     * @param val value to truncate
+     * @param precision bits of precision
+     * @return truncated value
+     */
+    static long truncateLong(final long val, final int precision) {
+        long baseTruncationMask = 0xfff0000000000000L;
+        final long mask = baseTruncationMask >> precision;
+        return val & mask;
+    }
 }

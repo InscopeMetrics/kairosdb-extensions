@@ -17,7 +17,7 @@ package org.kairosdb.testing;
 
 import com.google.common.collect.Maps;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
-import io.inscopemetrics.kairosdb.HistogramDataPointImpl;
+import io.inscopemetrics.kairosdb.HistogramDataPointV2Impl;
 import org.junit.Assert;
 import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.datastore.DataPointGroup;
@@ -126,7 +126,7 @@ public final class HistogramUtils {
         }
         final double mean = sum / count;
 
-        return new HistogramDataPointImpl(timeStamp, bins, min, max, mean, sum);
+        return new HistogramDataPointV2Impl(timeStamp, bins, min, max, mean, sum);
     }
 
 }

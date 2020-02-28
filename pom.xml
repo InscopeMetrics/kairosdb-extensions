@@ -89,14 +89,22 @@
     <org.json.version>chargebee-1.0</org.json.version>
     <slf4j.version>1.7.2</slf4j.version>
 
+    <!-- External dependencies -->
+    <protobuf.version>3.5.1</protobuf.version>
+
     <!-- Test Dependency Versions -->
+    <apache.math3.version>3.2</apache.math3.version>
     <hamcrest.version>2.1</hamcrest.version>
     <junit.version>4.12</junit.version>
+    <metrics.generator.version>1.2.2</metrics.generator.version>
+    <metrics.client.version>0.10.0</metrics.client.version>
     <mockito.version>2.23.4</mockito.version>
+
 
     <!-- Plugin Versions -->
     <docker.maven.plugin.version>0.30.0</docker.maven.plugin.version>
     <maven.assembly.plugin.version>3.1.1</maven.assembly.plugin.version>
+    <protoc.jar.maven.plugin.version>3.5.1.1</protoc.jar.maven.plugin.version>
     <rpm.maven.plugin.version>2.2.0</rpm.maven.plugin.version>
 
     <!-- Code Coverage -->
@@ -140,6 +148,19 @@
         <artifactId>wrapper-maven-plugin</artifactId>
         <inherited>false</inherited>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <!-- TODO: The protobuf plugin generates redundant casts, remove the compilerArgs
+               once https://github.com/google/protobuf/issues/1816 is fixed -->
+          <compilerArgs combine.children="append">
+            <arg>-Xlint:-cast</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
+
+
 
       <!-- Project Specific Plugins -->
       <plugin>
@@ -269,6 +290,28 @@
           <skip>${skipDockerBuild}</skip>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>com.github.os72</groupId>
+        <artifactId>protoc-jar-maven-plugin</artifactId>
+        <version>${protoc.jar.maven.plugin.version}</version>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <protocVersion>${protobuf.version}</protocVersion>
+              <includeDirectories>
+                <include>src/main/proto</include>
+              </includeDirectories>
+              <inputDirectories>
+                <include>src/main/proto</include>
+              </inputDirectories>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
@@ -364,6 +407,12 @@
       <scope>provided</scope>
     </dependency>
     <!-- Dependencies -->
+    <!-- Protobuf -->
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <version>${protobuf.version}</version>
+    </dependency>
     <dependency>
       <groupId>com.github.spotbugs</groupId>
       <artifactId>spotbugs-annotations</artifactId>
@@ -402,6 +451,24 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
       <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math3</artifactId>
+      <version>${apache.math3.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.arpnetworking.metrics</groupId>
+      <artifactId>generator</artifactId>
+      <version>${metrics.generator.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.arpnetworking.metrics</groupId>
+      <artifactId>metrics-client</artifactId>
+      <version>${metrics.client.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -17,7 +17,7 @@ package io.inscopemetrics.kairosdb.aggregators;
 
 import com.google.inject.Inject;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
-import io.inscopemetrics.kairosdb.HistogramDataPointFactory;
+import io.inscopemetrics.kairosdb.HistogramDataPointV2Factory;
 import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.aggregator.AggregatedDataPointGroupWrapper;
 import org.kairosdb.core.annotation.FeatureComponent;
@@ -57,12 +57,12 @@ public class HistogramPercentRemainingAggregator implements Aggregator {
 
     @Override
     public boolean canAggregate(final String groupType) {
-        return HistogramDataPointFactory.GROUP_TYPE.equals(groupType);
+        return HistogramDataPointV2Factory.GROUP_TYPE.equals(groupType);
     }
 
     @Override
     public String getAggregatedGroupType(final String groupType) {
-        return HistogramDataPointFactory.GROUP_TYPE;
+        return HistogramDataPointV2Factory.GROUP_TYPE;
     }
 
     private class HistogramPercentRemainingDataPointAggregator extends AggregatedDataPointGroupWrapper {

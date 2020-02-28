@@ -17,7 +17,7 @@ package io.inscopemetrics.kairosdb.aggregators;
 
 import com.google.common.collect.Maps;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
-import io.inscopemetrics.kairosdb.HistogramDataPointImpl;
+import io.inscopemetrics.kairosdb.HistogramDataPointV2Impl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -115,7 +115,7 @@ public final class HistogramFilterAggregatorTest {
             count++;
         }
         final double mean = sum / count;
-        return new HistogramDataPointImpl(timeStamp, 7, bins, min, max, mean, sum);
+        return new HistogramDataPointV2Impl(timeStamp, 7, bins, min, max, mean, sum);
     }
 
     private HistogramDataPoint createExactHistogram(final long timeStamp, final Double... values) {
@@ -132,7 +132,7 @@ public final class HistogramFilterAggregatorTest {
             count++;
         }
         final double mean = sum / count;
-        return new HistogramDataPointImpl(timeStamp, 7, bins, min, max, mean, sum);
+        return new HistogramDataPointV2Impl(timeStamp, 7, bins, min, max, mean, sum);
     }
 
     private void runTest(final FilterAggregator.FilterOperation op,

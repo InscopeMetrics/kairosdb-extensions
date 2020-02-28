@@ -18,7 +18,7 @@ package io.inscopemetrics.kairosdb.aggregators;
 
 import com.google.common.collect.Maps;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
-import io.inscopemetrics.kairosdb.HistogramDataPointImpl;
+import io.inscopemetrics.kairosdb.HistogramDataPointV2Impl;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kairosdb.core.datapoints.DoubleDataPoint;
@@ -40,7 +40,7 @@ public class HistogramCountAggregatorTest {
         bins.put(1337d, 2147483647);
         final double mean =  1337d;
 
-        final HistogramDataPoint dp = new HistogramDataPointImpl(
+        final HistogramDataPoint dp = new HistogramDataPointV2Impl(
                 1L, bins,  min, max, mean, sum);
         final ListDataPointGroup group = new ListDataPointGroup("testCombineLargeValues");
         group.addDataPoint(dp);

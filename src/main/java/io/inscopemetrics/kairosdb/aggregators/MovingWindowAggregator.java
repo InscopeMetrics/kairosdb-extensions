@@ -431,6 +431,11 @@ public class MovingWindowAggregator extends RangeAggregator {
         }
 
         @Override
+        public int getPrecision() {
+            return wrappedDataPoint.getPrecision();
+        }
+
+        @Override
         public NavigableMap<Double, Integer> getMap() {
             return wrappedDataPoint.getMap();
         }

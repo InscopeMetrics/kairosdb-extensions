@@ -17,6 +17,8 @@ public class HistogramTest {
         final JSONObject bins = new JSONObject();
         bins.put("1337", 8589934592d);
         serialized.put("bins", bins);
+        serialized.put("precision", 7);
+
 
         final Histogram h = new Histogram(serialized);
 

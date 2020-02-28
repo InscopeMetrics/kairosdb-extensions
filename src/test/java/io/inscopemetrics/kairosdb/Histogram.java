@@ -36,6 +36,7 @@ public class Histogram {
     private double max;
     private double sum;
     private long count;
+    private byte precision;
 
     /**
      * Public constructor.
@@ -54,6 +55,7 @@ public class Histogram {
             bins.compute(Math.floor(number), (i, j) -> j == null ? 1 : j + 1);
             count++;
         }
+        precision = 7;
     }
 
     /**
@@ -67,6 +69,7 @@ public class Histogram {
         min = json.getDouble("min");
         max = json.getDouble("max");
         sum = json.getDouble("sum");
+        precision = (byte) json.getInt("precision");
         final JSONObject binsJson = json.getJSONObject("bins");
         for (final Iterator<String> it = (Iterator<String>) binsJson.keys(); it.hasNext();) {
             final String key = it.next();
@@ -89,6 +92,7 @@ public class Histogram {
                     && other.count == count
                     && other.max == max
                     && other.min == min
+                    && other.precision == precision
                     && other.sum == sum;
         } else {
             return false;
@@ -97,7 +101,7 @@ public class Histogram {
 
     @Override
     public int hashCode() {
-        return Objects.hash(bins, count, min, max, sum);
+        return Objects.hash(bins, count, min, max, sum, precision);
     }
 
     @Override
@@ -107,6 +111,7 @@ public class Histogram {
                 .add("max", max)
                 .add("sum", sum)
                 .add("count", count)
+                .add("precision", precision)
                 .add("bins", bins)
                 .toString();
     }
@@ -123,6 +128,7 @@ public class Histogram {
                 .put("mean", sum / count)
                 .put("min", min)
                 .put("max", max)
+                .put("precision", precision)
                 .put("sum", sum);
         return histogram;
     }
@@ -141,6 +147,14 @@ public class Histogram {
 
     public double getSum() {
         return sum;
+    }
+
+    public void setPrecision(final byte precision) {
+        this.precision = precision;
+    }
+
+    public byte getPrecision() {
+        return precision;
     }
 
     public long getCount() {
