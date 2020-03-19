@@ -17,8 +17,10 @@ package io.inscopemetrics.kairosdb;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.datapoints.DataPointFactory;
+import org.kairosdb.util.KDataInput;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -88,6 +90,11 @@ public class HistogramDataPointFactory implements DataPointFactory {
         final double sum = ensureFinite(buffer.readDouble(), "sum");
 
         return new HistogramDataPointImpl(timestamp, bins, min, max, mean, sum);
+    }
+
+    @SuppressFBWarnings("BC_UNCONFIRMED_CAST") // In kdb 1.3.0+, KDataInput extends DataInput, don't call this in 1.2.x
+    public DataPoint getDataPoint(final long timestamp, final KDataInput buffer) throws IOException {
+        return getDataPoint(timestamp, (DataInput) buffer);
     }
 
     private double ensureFinite(final double x, final String name) {
