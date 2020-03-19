@@ -66,12 +66,13 @@ public final class HistogramMergeAggregator extends RangeAggregator {
     private static final class HistogramMeanDataPointAggregator implements RangeSubAggregator {
         @Override
         public Iterable<DataPoint> getNextDataPoints(final long returnTime, final Iterator<DataPoint> dataPointRange) {
+            final int maxPrecision = 64;
             TreeMap<Double, Integer> merged = Maps.newTreeMap();
             double min = Double.MAX_VALUE;
             double max = -Double.MAX_VALUE;
             double sum = 0;
             long count = 0;
-            int precision = 64;
+            int precision = maxPrecision;
             int originalCount = 0;
 
             while (dataPointRange.hasNext()) {

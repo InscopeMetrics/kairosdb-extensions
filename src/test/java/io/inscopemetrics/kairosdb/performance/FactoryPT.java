@@ -15,11 +15,11 @@
  */
 package io.inscopemetrics.kairosdb.performance;
 
-import io.inscopemetrics.kairosdb.HistogramFormingMetrics;
 import com.arpnetworking.metrics.generator.metric.GaussianCountMetricGenerator;
 import com.arpnetworking.metrics.generator.metric.GaussianMetricGenerator;
 import com.arpnetworking.metrics.generator.name.SingleNameGenerator;
 import com.google.gson.JsonObject;
+import io.inscopemetrics.kairosdb.HistogramFormingMetrics;
 import org.apache.commons.math3.random.MersenneTwister;
 import org.junit.Test;
 import org.kairosdb.core.DataPoint;

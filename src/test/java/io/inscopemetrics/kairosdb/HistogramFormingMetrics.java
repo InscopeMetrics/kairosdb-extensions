@@ -173,20 +173,15 @@ public class HistogramFormingMetrics implements Metrics {
         return sum / count;
     }
 
-    private double truncate(final double val) {
-        final long mask = 0xfff0000000000000L >> precision;
-        return Double.longBitsToDouble(Double.doubleToRawLongBits(val) & mask);
-    }
-
-    private void recordValue(final double value, final int count) {
-        histogram.merge(truncate(value), count, (i, j) -> i + j);
+    private void recordValue(final double value, final int sampleCount) {
+        histogram.merge(HistogramDataPoint.truncate(value, precision), sampleCount, (i, j) -> i + j);
         if (min == null || value < min) {
             min = value;
         }
         if (max == null || value > max) {
             max = value;
         }
-        this.count += count;
+        this.count += sampleCount;
         sum += value;
     }
 

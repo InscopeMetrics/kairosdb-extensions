@@ -31,6 +31,7 @@ import java.util.TreeMap;
  */
 @SuppressFBWarnings("FE_FLOATING_POINT_EQUALITY")
 public class Histogram {
+    private static final byte DEFAULT_PRECISION = 7;
     private final TreeMap<Double, Long> bins = new TreeMap<>();
     private double min;
     private double max;
@@ -55,7 +56,7 @@ public class Histogram {
             bins.compute(Math.floor(number), (i, j) -> j == null ? 1 : j + 1);
             count++;
         }
-        precision = 7;
+        precision = DEFAULT_PRECISION;
     }
 
     /**

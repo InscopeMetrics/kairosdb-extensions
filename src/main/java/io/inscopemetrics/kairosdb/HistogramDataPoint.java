@@ -86,7 +86,7 @@ public interface HistogramDataPoint extends DataPoint {
      * @return truncated value
      */
     static long truncateLong(final long val, final int precision) {
-        long baseTruncationMask = 0xfff0000000000000L;
+        final long baseTruncationMask = 0xfff0000000000000L;
         final long mask = baseTruncationMask >> precision;
         return val & mask;
     }
