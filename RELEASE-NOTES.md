@@ -5,6 +5,18 @@ KairosDb Extensions Release Notes
 ------------------------
 * _TBD_
 
+2.1.10 - February 26, 2020
+------------------------
+* Upgrade `getSampleCount` method on `HistogramDataPointImpl` to use a `long`.
+
+2.1.9 - February 19, 2020
+------------------------
+* Convert `Histogram` bucket count and sample count to `long`.
+* Update `HistogramCountAggregator` to use `long`.
+* Suppress infinite values in `HistogramDataPointFactory`.
+
+***NOTE:*** Release 2.1.8 did not complete fully.
+
 2.1.7 - July 9, 2019
 ------------------------
 * Initial release to `io.inscopemetrics.kairosdb`
