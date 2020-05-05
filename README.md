@@ -5,8 +5,8 @@ KairosDb Extensions
     <img src="https://img.shields.io/hexpm/l/plug.svg"
          alt="License: Apache 2">
 </a>
-<a href="https://travis-ci.org/InscopeMetrics/kairosdb-extensions/">
-    <img src="https://travis-ci.org/InscopeMetrics/kairosdb-extensions.png?branch=master"
+<a href="https://travis-ci.com/InscopeMetrics/kairosdb-extensions/">
+    <img src="https://travis-ci.com/InscopeMetrics/kairosdb-extensions.svg?branch=master"
          alt="Travis Build">
 </a>
 <a href="http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22io.inscopemetrics.kairosdb%22%20a%3A%22kairosdb-extensions%22">
