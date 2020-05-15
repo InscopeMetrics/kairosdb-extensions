@@ -19,7 +19,6 @@ package io.inscopemetrics.kairosdb.aggregators;
 import com.google.common.collect.Maps;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
 import io.inscopemetrics.kairosdb.HistogramDataPointImpl;
-import org.junit.Assert;
 import org.junit.Test;
 import org.kairosdb.core.datapoints.DoubleDataPoint;
 import org.kairosdb.core.datapoints.DoubleDataPointFactoryImpl;
@@ -29,6 +28,14 @@ import org.kairosdb.testing.ListDataPointGroup;
 
 import java.util.TreeMap;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+/**
+ * Test class for {@link HistogramCountAggregator}.
+ *
+ * @author William Ehlardt (whale at dropbox dot com)
+ */
 public class HistogramCountAggregatorTest {
 
     @Test
@@ -51,8 +58,8 @@ public class HistogramCountAggregatorTest {
         final HistogramCountAggregator aggregator = new HistogramCountAggregator(new DoubleDataPointFactoryImpl());
         final DataPointGroup result = aggregator.aggregate(group);
 
-        Assert.assertTrue(result.hasNext());
+        assertTrue(result.hasNext());
         final DoubleDataPoint resultDataPoint = (DoubleDataPoint) result.next();
-        Assert.assertEquals(8589934588L, resultDataPoint.getLongValue());
+        assertEquals(8589934588L, resultDataPoint.getLongValue());
     }
 }

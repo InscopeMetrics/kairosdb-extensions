@@ -18,7 +18,6 @@ package io.inscopemetrics.kairosdb.aggregators;
 import com.google.common.collect.Maps;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
 import io.inscopemetrics.kairosdb.HistogramDataPointImpl;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.kairosdb.core.DataPoint;
@@ -28,6 +27,10 @@ import org.kairosdb.core.datastore.DataPointGroup;
 import org.kairosdb.testing.ListDataPointGroup;
 
 import java.util.TreeMap;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for the Histogram Filter Aggregator.
@@ -66,31 +69,31 @@ public final class HistogramFilterAggregatorTest {
 
     private void assertGroupsEqual(final DataPointGroup expected, final DataPointGroup actual) {
         while (expected.hasNext()) {
-            Assert.assertTrue("Actual group is missing data points", actual.hasNext());
+            assertTrue("Actual group is missing data points", actual.hasNext());
             final DataPoint act = actual.next();
             final DataPoint exp = expected.next();
-            Assert.assertEquals("Expected and actual timestamps do not match", exp.getTimestamp(),
+            assertEquals("Expected and actual timestamps do not match", exp.getTimestamp(),
                     act.getTimestamp());
             assertHistogramsEqual(exp, act);
         }
-        Assert.assertFalse("Actual group has too many data points", actual.hasNext());
+        assertFalse("Actual group has too many data points", actual.hasNext());
     }
 
     private void assertHistogramsEqual(final DataPoint expected, final DataPoint actual) {
-        Assert.assertTrue(
+        assertTrue(
                 "Data point not an instance of class HistogramDataPoint",
                 expected instanceof HistogramDataPoint);
-        Assert.assertTrue(
+        assertTrue(
                 "Data point not an instance of class HistogramDataPoint",
                 actual instanceof HistogramDataPoint);
         final HistogramDataPoint hist1 = (HistogramDataPoint) expected;
         final HistogramDataPoint hist2 = (HistogramDataPoint) actual;
 
-        Assert.assertEquals("Histograms did not match", hist1.getMap(), hist2.getMap());
-        Assert.assertEquals(hist1.getSampleCount(), hist2.getSampleCount());
-        Assert.assertEquals(hist1.getSum(), hist2.getSum(), 0);
-        Assert.assertEquals(hist1.getMin(), hist2.getMin(), 0);
-        Assert.assertEquals(hist1.getMax(), hist2.getMax(), 0);
+        assertEquals("Histograms did not match", hist1.getMap(), hist2.getMap());
+        assertEquals(hist1.getSampleCount(), hist2.getSampleCount());
+        assertEquals(hist1.getSum(), hist2.getSum(), 0);
+        assertEquals(hist1.getMin(), hist2.getMin(), 0);
+        assertEquals(hist1.getMax(), hist2.getMax(), 0);
     }
 
     private ListDataPointGroup createGroup(final DataPoint... dataPoints) {
@@ -190,7 +193,7 @@ public final class HistogramFilterAggregatorTest {
     public void testFilterEmptyGroup() {
         final DataPointGroup group = createGroup();
         final DataPointGroup results = aggregator.aggregate(group);
-        Assert.assertFalse("Actual group was not empty", results.hasNext());
+        assertFalse("Actual group was not empty", results.hasNext());
     }
 
     @Test

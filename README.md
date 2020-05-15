@@ -19,6 +19,33 @@ KairosDb Extensions
 
 Provides extensions to [KairosDb](https://kairosdb.github.io/) time series data store.
 
+Features
+--------
+
+### Histograms
+
+Histograms are a method of storing multiple samples in a compact way that allows for
+reaggregation of most statistics (with a loss of precision). This plugin creates a histogram
+datapoint type and recreates many of the aggregators that are used in stock KairosDB to work
+with histograms.
+
+### Aggregators
+
+#### Merge
+
+Computes a merged histogram from multiple histograms. Bucket values are as precise as the
+least-precise histogram. Supports Inscope Metrics histograms only.
+
+#### Apdex
+
+Computes an [Apdex](https://en.wikipedia.org/wiki/Apdex) score from the target argument.
+Supports Inscope Metrics histograms only.
+
+#### Moving Window
+
+Helper aggregator that allows a moving window computation from any other aggregator.
+Supports Inscope Metrics histograms and native KairosDb scalar data.
+
 Setup
 -----
 

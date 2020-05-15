@@ -28,7 +28,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Assert;
 import org.junit.Test;
 import org.kairosdb.testing.AggregatorAndParams;
 
@@ -39,6 +38,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for storing histogram datapoints.
@@ -241,7 +242,7 @@ public final class AggregationIT {
         final String body = queryWithExpectedCode("non_existing_metric", 1000, "sum", Collections.emptyMap(), 200);
         final JSONObject responseJson = new JSONObject(body);
         final JSONObject queryObject = responseJson.getJSONArray("queries").getJSONObject(0);
-        Assert.assertEquals(0, queryObject.getInt("sample_size"));
+        assertEquals(0, queryObject.getInt("sample_size"));
     }
 
     // **** filter aggregator ***
@@ -541,11 +542,11 @@ public final class AggregationIT {
             throws JSONException {
         final JSONObject responseJson = new JSONObject(responseBody);
         final JSONObject queryObject = responseJson.getJSONArray("queries").getJSONObject(0);
-        Assert.assertEquals(expectedSamples, queryObject.getInt("sample_size"));
+        assertEquals(expectedSamples, queryObject.getInt("sample_size"));
         final JSONArray result = queryObject.getJSONArray("results").getJSONObject(0).getJSONArray("values").getJSONArray(0);
-        Assert.assertEquals(1, result.getInt(0));
+        assertEquals(1, result.getInt(0));
         final double avg = result.getDouble(1);
-        Assert.assertEquals(expectedResult, avg, 0.000001);
+        assertEquals(expectedResult, avg, 0.000001);
     }
 
     private void verifyQueryResponse(
@@ -555,12 +556,12 @@ public final class AggregationIT {
             throws JSONException {
         final JSONObject responseJson = new JSONObject(responseBody);
         final JSONObject queryObject = responseJson.getJSONArray("queries").getJSONObject(0);
-        Assert.assertEquals(expectedSamples, queryObject.getInt("sample_size"));
+        assertEquals(expectedSamples, queryObject.getInt("sample_size"));
         final JSONArray result = queryObject.getJSONArray("results").getJSONObject(0).getJSONArray("values").getJSONArray(0);
-        Assert.assertEquals(1, result.getInt(0));
+        assertEquals(1, result.getInt(0));
         final JSONObject histObject = result.getJSONObject(1);
         final Histogram returnHistogram = new Histogram(histObject);
-        Assert.assertEquals(expectedResult, returnHistogram);
+        assertEquals(expectedResult, returnHistogram);
     }
 
     private void verifyQueryResponse(
@@ -570,16 +571,16 @@ public final class AggregationIT {
             throws JSONException {
         final JSONObject responseJson = new JSONObject(responseBody);
         final JSONObject queryObject = responseJson.getJSONArray("queries").getJSONObject(0);
-        Assert.assertEquals(expectedSamples, queryObject.getInt("sample_size"));
+        assertEquals(expectedSamples, queryObject.getInt("sample_size"));
         final JSONArray result = queryObject.getJSONArray("results")
                 .getJSONObject(0).getJSONArray("values");
 
         for (int i = 0; i < result.length(); i++) {
             final JSONArray jsonPair = result.getJSONArray(i);
-            Assert.assertEquals(i + 1, jsonPair.getInt(0));
+            assertEquals(i + 1, jsonPair.getInt(0));
             final Histogram actual = new Histogram(jsonPair.getJSONObject(1));
 
-            Assert.assertEquals(expectedResult.get(i), actual);
+            assertEquals(expectedResult.get(i), actual);
         }
     }
 
@@ -590,16 +591,16 @@ public final class AggregationIT {
             throws JSONException {
         final JSONObject responseJson = new JSONObject(responseBody);
         final JSONObject queryObject = responseJson.getJSONArray("queries").getJSONObject(0);
-        Assert.assertEquals(expectedSamples, queryObject.getInt("sample_size"));
+        assertEquals(expectedSamples, queryObject.getInt("sample_size"));
         final JSONArray result = queryObject.getJSONArray("results")
                 .getJSONObject(0).getJSONArray("values");
 
-        Assert.assertEquals(expectedResult.size(), result.length());
+        assertEquals(expectedResult.size(), result.length());
         for (int i = 0; i < result.length(); i++) {
             final JSONArray jsonPair = result.getJSONArray(i);
-            Assert.assertEquals(i + 1, jsonPair.getInt(0));
+            assertEquals(i + 1, jsonPair.getInt(0));
             final double actual = jsonPair.getDouble(1);
-            Assert.assertEquals(expectedResult.get(i), actual, 0.000001);
+            assertEquals(expectedResult.get(i), actual, 0.000001);
         }
     }
 
@@ -616,7 +617,7 @@ public final class AggregationIT {
             } else {
                 body = "[empty]";
             }
-            Assert.assertEquals("response: " + body, expectedCode, response.getStatusLine().getStatusCode());
+            assertEquals("response: " + body, expectedCode, response.getStatusLine().getStatusCode());
         }
     }
 
@@ -627,7 +628,7 @@ public final class AggregationIT {
             final int expectedCode) throws JSONException, IOException {
         final HttpPost post = KairosHelper.postHistogram(timestamp, histogram, metricName);
         try (CloseableHttpResponse response = client.execute(post)) {
-            Assert.assertEquals(expectedCode, response.getStatusLine().getStatusCode());
+            assertEquals(expectedCode, response.getStatusLine().getStatusCode());
         }
     }
 
@@ -654,7 +655,7 @@ public final class AggregationIT {
         final HttpPost queryRequest = KairosHelper.queryFor(1, endTime, metricName, aggregators);
         try (CloseableHttpResponse lookupResponse = client.execute(queryRequest)) {
             final String body = CharStreams.toString(new InputStreamReader(lookupResponse.getEntity().getContent(), Charsets.UTF_8));
-            Assert.assertEquals("response: " + body, expectedCode, lookupResponse.getStatusLine().getStatusCode());
+            assertEquals("response: " + body, expectedCode, lookupResponse.getStatusLine().getStatusCode());
             return body;
         }
     }

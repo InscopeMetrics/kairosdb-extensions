@@ -39,6 +39,16 @@ public class DelegatingFilterAggregator extends DelegatingAggregator {
     private double threshold = 0.0;
 
     /**
+     * Public constructor.
+     *
+     * @param aggregatorMap aggregators to use
+     */
+    @Inject
+    public DelegatingFilterAggregator(@Named("filter") final DelegatingAggregatorMap aggregatorMap) {
+        super(aggregatorMap);
+    }
+
+    /**
      * Setter for filter operation.
      *
      * @param filterOp the filter operation
@@ -63,16 +73,6 @@ public class DelegatingFilterAggregator extends DelegatingAggregator {
      */
     public void setFilterIndeterminateInclusion(final HistogramFilterAggregator.FilterIndeterminate inclusion) {
         filterinc = inclusion;
-    }
-
-    /**
-     * Public constructor.
-     *
-     * @param aggregatorMap aggregators to use
-     */
-    @Inject
-    public DelegatingFilterAggregator(@Named("filter") final DelegatingAggregatorMap aggregatorMap) {
-        super(aggregatorMap);
     }
 
     @Override
