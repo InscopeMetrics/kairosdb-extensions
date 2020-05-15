@@ -26,7 +26,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Test class for {@link Histogram}.
  *
- * @author William Ehlardt (whale at dropbox dot com)
+ * @author William Ehlhardt (whale at dropbox dot com)
  */
 public class HistogramTest {
     @Test

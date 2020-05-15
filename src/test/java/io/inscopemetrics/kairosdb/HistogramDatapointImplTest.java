@@ -24,7 +24,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Test class for {@link HistogramDataPointImpl}.
  *
- * @author William Ehlardt (whale at dropbox dot com)
+ * @author William Ehlhardt (whale at dropbox dot com)
  */
 public class HistogramDatapointImplTest {
     @Test
