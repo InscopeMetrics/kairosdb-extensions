@@ -15,7 +15,6 @@
  */
 package io.inscopemetrics.kairosdb.aggregators;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.kairosdb.core.DataPoint;
@@ -33,6 +32,10 @@ import org.kairosdb.testing.ListDataPointGroup;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for the Histogram Percent Remaining Aggregator.
@@ -85,7 +88,7 @@ public final class HistogramPercentRemainingAggregatorTest {
     public void testPercentRemainingNotHistograms() {
         final DataPointGroup percentRemainingGroup = percentRemainingAggregator.aggregate(
                 HistogramUtils.createGroup(SINGLE_DOUBLE_GROUP));
-        Assert.assertTrue(percentRemainingGroup.hasNext());
+        assertTrue(percentRemainingGroup.hasNext());
         percentRemainingGroup.next();
     }
 
@@ -153,18 +156,18 @@ public final class HistogramPercentRemainingAggregatorTest {
                                          final Aggregator... aggregators) {
         DataPointGroup aggregated = HistogramUtils.createGroup(startGroup);
 
-        for (Aggregator agg : aggregators) {
+        for (final Aggregator agg : aggregators) {
             aggregated = agg.aggregate(aggregated);
         }
 
         final DataPointGroup percentRemainingGroup = percentRemainingAggregator.aggregate(aggregated);
 
         while (expected.hasNext()) {
-            Assert.assertTrue(percentRemainingGroup.hasNext());
+            assertTrue(percentRemainingGroup.hasNext());
             final DataPoint actual = percentRemainingGroup.next();
-            Assert.assertEquals(expected.next(), actual);
+            assertEquals(expected.next(), actual);
         }
-        Assert.assertFalse(percentRemainingGroup.hasNext());
+        assertFalse(percentRemainingGroup.hasNext());
     }
 
     private static DataPointGroup createDoubleGroup(final double... values) {
