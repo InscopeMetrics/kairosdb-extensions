@@ -18,7 +18,7 @@
   <parent>
     <groupId>io.inscopemetrics.build</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>2.0.5</version>
+    <version>2.2.0</version>
     <relativePath />
   </parent>
 
@@ -72,7 +72,7 @@
   <properties>
     <!-- Dependency Versions -->
     <aspectjrt.version>1.8.9</aspectjrt.version>
-    <spotbugs.annotations.version>3.1.12</spotbugs.annotations.version>
+    <spotbugs.annotations.version>4.0.3</spotbugs.annotations.version>
 
     <!-- Provided by KairosDB
          NOTE: These need to be kept synchronized wrt version when KairosDB version changes -->
@@ -90,13 +90,13 @@
     <slf4j.version>1.7.2</slf4j.version>
 
     <!-- Test Dependency Versions -->
-    <hamcrest.version>2.1</hamcrest.version>
-    <junit.version>4.12</junit.version>
+    <hamcrest.version>2.2</hamcrest.version>
+    <junit.version>4.13</junit.version>
     <mockito.version>2.23.4</mockito.version>
 
     <!-- Plugin Versions -->
-    <docker.maven.plugin.version>0.30.0</docker.maven.plugin.version>
-    <maven.assembly.plugin.version>3.1.1</maven.assembly.plugin.version>
+    <docker.maven.plugin.version>0.33.0</docker.maven.plugin.version>
+    <maven.assembly.plugin.version>3.3.0</maven.assembly.plugin.version>
     <rpm.maven.plugin.version>2.2.0</rpm.maven.plugin.version>
 
     <!-- Code Coverage -->
