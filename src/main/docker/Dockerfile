@@ -28,7 +28,7 @@ RUN apk --no-cache --update add bash
 RUN apk --no-cache --update add curl; \
   mkdir /opt; \
   cd /opt; \
-  curl -L https://github.com/kairosdb/kairosdb/releases/download/v1.2.2/kairosdb-1.2.2-1.tar.gz | tar zxfp - ; \
+  curl -L https://github.com/ddimensia/kairosdb/releases/download/v1.2.1-dd-4/kairosdb-1.2.1-dd-4.tar.gz | tar zxfp - ; \
   apk del curl
 
 # Build: Extensions
