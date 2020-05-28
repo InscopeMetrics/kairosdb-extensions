@@ -35,7 +35,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiFunction;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -58,14 +57,14 @@ public final class HistogramPercentRemainingAggregatorTest extends AbstractHisto
     private HistogramFilterAggregator filterAggregator;
     private HistogramMergeAggregator mergeAggregator;
 
-    public HistogramPercentRemainingAggregatorTest(final BiFunction<Long, Iterable<Double>, DataPoint> histogramCreator) {
-        singleHistGroup = Collections.singletonList(histogramCreator.apply(1L, Arrays.asList(1d, 10d, 100d, 1000d)));
+    public HistogramPercentRemainingAggregatorTest(final CreateHistogramFromValues histogramCreator) {
+        singleHistGroup = Collections.singletonList(histogramCreator.create(1L, Arrays.asList(1d, 10d, 100d, 1000d)));
         singleDoubleGroup = Collections.singletonList(new DoubleDataPoint(1L, 0d));
-        emptyHistGroup = Collections.singletonList(histogramCreator.apply(1L, Collections.emptyList()));
+        emptyHistGroup = Collections.singletonList(histogramCreator.create(1L, Collections.emptyList()));
         multiHistGroup = Arrays.asList(
-                histogramCreator.apply(1L, Arrays.asList(10d, 20d, 30d, 40d)),
-                histogramCreator.apply(2L, Arrays.asList(20d, 30d, 40d, 50d)),
-                histogramCreator.apply(3L, Arrays.asList(30d, 40d, 50d, 60d)));
+                histogramCreator.create(1L, Arrays.asList(10d, 20d, 30d, 40d)),
+                histogramCreator.create(2L, Arrays.asList(20d, 30d, 40d, 50d)),
+                histogramCreator.create(3L, Arrays.asList(30d, 40d, 50d, 60d)));
     }
 
     @Parameterized.Parameters

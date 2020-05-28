@@ -28,7 +28,8 @@ import java.util.Optional;
 import javax.inject.Provider;
 
 /**
- * Serves as a base for an aggregator that will delegate and intelligently dispatch aggregation to appropriate classes.
+ * Serves as a base for an aggregator that will delegate and intelligently
+ * dispatch aggregation to appropriate classes.
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */

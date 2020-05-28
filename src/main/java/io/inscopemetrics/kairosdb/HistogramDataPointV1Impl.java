@@ -170,7 +170,10 @@ public class HistogramDataPointV1Impl extends DataPointHelper implements Histogr
     @Override
     public void writeValueToBuffer(final DataOutput buffer) throws IOException {
         buffer.writeInt(map.size());
-        for (Map.Entry<Double, Long> entry : map.entrySet()) {
+        for (final Map.Entry<Double, Long> entry : map.entrySet()) {
+            // NOTE: That the v1 format persists bucket counts as integers for
+            // backwards compatibility. If your bucket counts require a long
+            // you must use the v2 format.
             buffer.writeDouble(entry.getKey());
             buffer.writeInt(entry.getValue().intValue());
         }
@@ -184,7 +187,7 @@ public class HistogramDataPointV1Impl extends DataPointHelper implements Histogr
     public void writeValueToJson(final JSONWriter writer) throws JSONException {
         writer.object().key("bins");
         writer.object();
-        for (Map.Entry<Double, Long> entry : map.entrySet()) {
+        for (final Map.Entry<Double, Long> entry : map.entrySet()) {
             writer.key(entry.getKey().toString()).value(entry.getValue());
         }
         writer.endObject();

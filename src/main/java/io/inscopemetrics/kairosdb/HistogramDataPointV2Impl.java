@@ -126,7 +126,8 @@ public class HistogramDataPointV2Impl extends DataPointHelper implements Histogr
         final HistogramKeyUtility keyUtility = HistogramKeyUtility.getInstance(precision);
 
         for (final Map.Entry<Double, Long> entry : map.entrySet()) {
-            builder.putHistogram(keyUtility.pack(entry.getKey()), entry.getValue());
+            builder.addBucketKey(keyUtility.pack(entry.getKey()));
+            builder.addBucketCount(entry.getValue());
         }
 
         builder.setMax(max);
@@ -134,7 +135,6 @@ public class HistogramDataPointV2Impl extends DataPointHelper implements Histogr
         builder.setMean(mean);
         builder.setSum(sum);
         builder.setPrecision(precision);
-
 
         final byte[] bytes = builder.build().toByteArray();
         buffer.writeInt(bytes.length);

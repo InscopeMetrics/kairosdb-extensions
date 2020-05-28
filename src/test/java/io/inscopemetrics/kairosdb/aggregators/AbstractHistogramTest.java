@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 
 /**
  * Abstract class to help with parameterization of histogram aggregator tests.
@@ -33,13 +32,13 @@ import java.util.function.BiFunction;
  */
 abstract class AbstractHistogramTest {
 
-    private static final BiFunction<Long, Iterable<Double>, DataPoint> CREATE_HISTOGRAM_V2_FROM_VALUES =
+    private static final CreateHistogramFromValues CREATE_HISTOGRAM_V2_FROM_VALUES =
             HistogramUtils::createHistogramV2;
-    private static final BiFunction<Long, Iterable<Double>, DataPoint> CREATE_HISTOGRAM_V1_FROM_VALUES =
+    private static final CreateHistogramFromValues CREATE_HISTOGRAM_V1_FROM_VALUES =
             HistogramUtils::createHistogramV1;
-    private static final BiFunction<Long, Map<Double, Long>, DataPoint> CREATE_HISTOGRAM_V2_FROM_COUNTS =
+    private static final CreateHistogramFromCounts CREATE_HISTOGRAM_V2_FROM_COUNTS =
             HistogramUtils::createHistogramV2;
-    private static final BiFunction<Long, Map<Double, Long>, DataPoint> CREATE_HISTOGRAM_V1_FROM_COUNTS =
+    private static final CreateHistogramFromCounts CREATE_HISTOGRAM_V1_FROM_COUNTS =
             HistogramUtils::createHistogramV1;
 
     /**
@@ -52,7 +51,7 @@ abstract class AbstractHistogramTest {
     public static Collection<Object[]> createParametersForHistogramFromValues(
             final Collection<Object> parametersPerFactory) {
         final List<Object[]> parameterSets = new ArrayList<>();
-        for (final BiFunction<Long, Iterable<Double>, DataPoint> factory : getHistogramFactoriesFromValues()) {
+        for (final CreateHistogramFromValues factory : getHistogramFactoriesFromValues()) {
             final Object[] parameters = new Object[parametersPerFactory.size() + 1];
 
             // The first parameter is the factory
@@ -81,7 +80,7 @@ abstract class AbstractHistogramTest {
     public static Collection<Object[]> createParametersForHistogramFromCounts(
             final Collection<Object> parametersPerFactory) {
         final List<Object[]> parameterSets = new ArrayList<>();
-        for (final BiFunction<Long, Map<Double, Long>, DataPoint> factory : getHistogramFactoriesFromCounts()) {
+        for (final CreateHistogramFromCounts factory : getHistogramFactoriesFromCounts()) {
             final Object[] parameters = new Object[parametersPerFactory.size() + 1];
 
             // The first parameter is the factory
@@ -101,28 +100,34 @@ abstract class AbstractHistogramTest {
     }
 
     /**
-     * Return the available histogram from values factories. Each factory is a
-     * {@link BiFunction} which accepts the timestamp as its first parameter and
-     * the {@link Iterable} of doubles as its second.
+     * Return the available histogram from values factories.
      *
      * @return {@link Iterable} of histogram factories.
      */
-    public static Iterable<BiFunction<Long, Iterable<Double>, DataPoint>> getHistogramFactoriesFromValues() {
+    public static Iterable<CreateHistogramFromValues> getHistogramFactoriesFromValues() {
         return Arrays.asList(
                 CREATE_HISTOGRAM_V1_FROM_VALUES,
                 CREATE_HISTOGRAM_V2_FROM_VALUES);
     }
 
     /**
-     * Return the available histogram from counts factories. Each factory is a
-     * {@link BiFunction} which accepts the timestamp as its first parameter and
-     * the {@link Map} of doubles to counts as its second.
+     * Return the available histogram from counts factories.
      *
      * @return {@link Iterable} of histogram factories.
      */
-    public static Iterable<BiFunction<Long, Map<Double, Long>, DataPoint>> getHistogramFactoriesFromCounts() {
+    public static Iterable<CreateHistogramFromCounts> getHistogramFactoriesFromCounts() {
         return Arrays.asList(
                 CREATE_HISTOGRAM_V1_FROM_COUNTS,
                 CREATE_HISTOGRAM_V2_FROM_COUNTS);
+    }
+
+    protected interface CreateHistogramFromValues {
+
+        DataPoint create(long timestamp, Iterable<Double> values);
+    }
+
+    protected interface CreateHistogramFromCounts {
+
+        DataPoint create(long timestamp, Map<Double, Long> counts);
     }
 }

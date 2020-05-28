@@ -30,7 +30,6 @@ import org.kairosdb.testing.ListDataPointGroup;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.function.BiFunction;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -61,10 +60,10 @@ public final class HistogramFilterAggregatorTest extends AbstractHistogramTest {
     private static final double POS_512_0 = 512.0;
     private static final double POS_516_0 = 516;
 
-    private final BiFunction<Long, Iterable<Double>, DataPoint> histogramCreatorFromValues;
+    private final CreateHistogramFromValues histogramCreatorFromValues;
     private HistogramFilterAggregator aggregator;
 
-    public HistogramFilterAggregatorTest(final BiFunction<Long, Iterable<Double>, DataPoint> histogramCreatorFromValues) {
+    public HistogramFilterAggregatorTest(final CreateHistogramFromValues histogramCreatorFromValues) {
         this.histogramCreatorFromValues = histogramCreatorFromValues;
     }
 
@@ -781,7 +780,7 @@ public final class HistogramFilterAggregatorTest extends AbstractHistogramTest {
     }
 
     private DataPoint createHistogram(final long timeStamp, final Double... values) {
-        return histogramCreatorFromValues.apply(timeStamp, Lists.newArrayList(values));
+        return histogramCreatorFromValues.create(timeStamp, Lists.newArrayList(values));
     }
 
     private void runTest(final FilterAggregator.FilterOperation op,

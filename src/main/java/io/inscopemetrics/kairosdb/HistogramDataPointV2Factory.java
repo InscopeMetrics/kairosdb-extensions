@@ -15,7 +15,6 @@
  */
 package io.inscopemetrics.kairosdb;
 
-import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.inscopemetrics.kairosdb.proto.v2.FormatV2;
@@ -27,7 +26,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 /**
  * Factory that creates {@link HistogramDataPointV2Impl}.
@@ -88,17 +86,14 @@ public class HistogramDataPointV2Factory implements DataPointFactory {
         final int precision = protoData.getPrecision();
         final HistogramKeyUtility keyUtility = HistogramKeyUtility.getInstance(precision);
 
-        final TreeMap<Double, Long> bins = protoData.getHistogramMap()
-                .entrySet()
-                .stream()
-                .collect(
-                        Collectors.toMap(
-                                entry -> keyUtility.unpack(entry.getKey()),
-                                Map.Entry::getValue,
-                                (u, v) -> {
-                                    throw new IllegalArgumentException(String.format("Duplicate key %s", u));
-                                },
-                                Maps::newTreeMap));
+        if (protoData.getBucketCountCount() != protoData.getBucketKeyCount()) {
+            throw new IllegalArgumentException("Mismatched bucket keys and counts");
+        }
+
+        final TreeMap<Double, Long> bins = new TreeMap<>();
+        for (int i = 0; i < protoData.getBucketCountCount(); ++i) {
+            bins.put(keyUtility.unpack(protoData.getBucketKey(i)), protoData.getBucketCount(i));
+        }
 
         final double min = protoData.getMin();
         final double max = protoData.getMax();

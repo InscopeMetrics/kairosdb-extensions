@@ -24,7 +24,6 @@ import org.kairosdb.core.annotation.FeatureComponent;
 import org.kairosdb.core.annotation.FeatureProperty;
 import org.kairosdb.core.annotation.ValidationProperty;
 import org.kairosdb.core.datapoints.DoubleDataPointFactory;
-import org.kairosdb.core.exception.KairosDBException;
 import org.kairosdb.core.http.rest.validation.NonZero;
 
 import java.util.Collections;
@@ -64,10 +63,9 @@ public final class HistogramPercentileAggregator extends RangeAggregator {
      * Public constructor.
      *
      * @param dataPointFactory A factory for creating DoubleDataPoints
-     * @throws KairosDBException on error
      */
     @Inject
-    public HistogramPercentileAggregator(final DoubleDataPointFactory dataPointFactory) throws KairosDBException {
+    public HistogramPercentileAggregator(final DoubleDataPointFactory dataPointFactory) {
         this.dataPointFactory = dataPointFactory;
     }
 

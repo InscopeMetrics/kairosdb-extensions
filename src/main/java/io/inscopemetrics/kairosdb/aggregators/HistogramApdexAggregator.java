@@ -89,7 +89,7 @@ public class HistogramApdexAggregator extends RangeAggregator{
             long satisfied = 0;
             long acceptable = 0;
             long total = 0;
-            final double acceptableThreshold = target * 4;
+            final double acceptableThreshold = target * 4d;
             while (dataPointRange.hasNext()) {
                 final DataPoint dp = dataPointRange.next();
                 if (dp instanceof HistogramDataPoint) {
