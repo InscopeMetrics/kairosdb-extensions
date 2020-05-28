@@ -65,7 +65,7 @@ public final class HistogramMergeAggregator extends RangeAggregator {
     private static final class HistogramMergeDataPointAggregator implements RangeSubAggregator {
         @Override
         public Iterable<DataPoint> getNextDataPoints(final long returnTime, final Iterator<DataPoint> dataPointRange) {
-            TreeMap<Double, Integer> merged = Maps.newTreeMap();
+            TreeMap<Double, Long> merged = Maps.newTreeMap();
             int precision = MAX_PRECISION;
             HistogramKeyUtility keyUtility = HistogramKeyUtility.getInstance(precision);
             double min = Double.MAX_VALUE;
@@ -87,30 +87,30 @@ public final class HistogramMergeAggregator extends RangeAggregator {
                         final HistogramKeyUtility newKeyUtility = HistogramKeyUtility.getInstance(precision);
                         keyUtility = newKeyUtility;
 
-                        final TreeMap<Double, Integer> downsampled = Maps.newTreeMap();
-                        for (final Map.Entry<Double, Integer> entry : merged.entrySet()) {
+                        final TreeMap<Double, Long> downsampled = Maps.newTreeMap();
+                        for (final Map.Entry<Double, Long> entry : merged.entrySet()) {
                             final Double mergedKey = entry.getKey();
-                            final Integer mergedValue = entry.getValue();
+                            final Long mergedValue = entry.getValue();
 
                             // Since precision is decreasing multiple keys from
                             // merged may update the same bucket in downsampled
                             downsampled.merge(
                                 newKeyUtility.truncateToDouble(mergedKey),
                                 mergedValue,
-                                Integer::sum);
+                                Long::sum);
                         }
                         merged = downsampled;
 
                     }
 
-                    for (final Map.Entry<Double, Integer> entry : hist.getMap().entrySet()) {
+                    for (final Map.Entry<Double, Long> entry : hist.getMap().entrySet()) {
                         // All we know is that precision is not going down but
                         // the precision of hist may be larger than merged
                         // so we need to truncate all the hist keys
                         merged.merge(
                                 keyUtility.truncateToDouble(entry.getKey()),
                                 entry.getValue(),
-                                Integer::sum);
+                                Long::sum);
                         count += entry.getValue();
                     }
 

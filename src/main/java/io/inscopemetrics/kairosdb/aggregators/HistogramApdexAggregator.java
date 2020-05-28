@@ -94,7 +94,7 @@ public class HistogramApdexAggregator extends RangeAggregator{
                 final DataPoint dp = dataPointRange.next();
                 if (dp instanceof HistogramDataPoint) {
                     final HistogramDataPoint hist = (HistogramDataPoint) dp;
-                    for (final Map.Entry<Double, Integer> entry : hist.getMap().entrySet()) {
+                    for (final Map.Entry<Double, Long> entry : hist.getMap().entrySet()) {
                         if (entry.getKey() <= target) {
                             satisfied += entry.getValue();
                         } else if (entry.getKey() <= acceptableThreshold) {

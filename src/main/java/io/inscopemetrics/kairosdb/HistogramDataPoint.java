@@ -71,5 +71,5 @@ public interface HistogramDataPoint extends DataPoint {
      * Getter for the map of lower bucket value to sample count contained in this HistogramDataPoint.
      * @return map of histogram buckets
      */
-    NavigableMap<Double, Integer> getMap();
+    NavigableMap<Double, Long> getMap();
 }

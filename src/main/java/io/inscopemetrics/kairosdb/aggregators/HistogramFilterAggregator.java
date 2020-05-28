@@ -183,7 +183,7 @@ public class HistogramFilterAggregator implements Aggregator {
             }
 
             final long timeStamp = dp.getTimestamp();
-            final TreeMap<Double, Integer> filtered = Maps.newTreeMap();
+            final TreeMap<Double, Long> filtered = Maps.newTreeMap();
             double min = Double.MAX_VALUE;
             double max = -Double.MAX_VALUE;
             double sum = 0;
@@ -197,7 +197,7 @@ public class HistogramFilterAggregator implements Aggregator {
                 return Optional.of(hist);
             }
 
-            for (final Map.Entry<Double, Integer> entry : hist.getMap().entrySet()) {
+            for (final Map.Entry<Double, Long> entry : hist.getMap().entrySet()) {
                 if (!shouldDiscard(entry.getKey(), histogramKeyUtility)) {
                     filtered.put(entry.getKey(), entry.getValue());
                     min = Math.min(

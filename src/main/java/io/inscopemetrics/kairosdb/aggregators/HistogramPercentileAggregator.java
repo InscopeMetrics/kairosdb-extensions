@@ -94,13 +94,13 @@ public final class HistogramPercentileAggregator extends RangeAggregator {
 
         @Override
         public Iterable<DataPoint> getNextDataPoints(final long returnTime, final Iterator<DataPoint> dataPointRange) {
-            final TreeMap<Double, Integer> merged = Maps.newTreeMap();
+            final TreeMap<Double, Long> merged = Maps.newTreeMap();
             long count = 0;
             while (dataPointRange.hasNext()) {
                 final DataPoint dp = dataPointRange.next();
                 if (dp instanceof HistogramDataPoint) {
                     final HistogramDataPoint hist = (HistogramDataPoint) dp;
-                    for (final Map.Entry<Double, Integer> entry : hist.getMap().entrySet()) {
+                    for (final Map.Entry<Double, Long> entry : hist.getMap().entrySet()) {
                         count += entry.getValue();
                         merged.compute(entry.getKey(), (key, existing) ->  entry.getValue() + (existing == null ? 0 : existing));
                     }
@@ -109,9 +109,9 @@ public final class HistogramPercentileAggregator extends RangeAggregator {
 
             final long target = (long) Math.ceil(percentile * count);
             long current = 0;
-            final Iterator<Map.Entry<Double, Integer>> entryIterator = merged.entrySet().iterator();
+            final Iterator<Map.Entry<Double, Long>> entryIterator = merged.entrySet().iterator();
             while (entryIterator.hasNext()) {
-                final Map.Entry<Double, Integer> entry = entryIterator.next();
+                final Map.Entry<Double, Long> entry = entryIterator.next();
                 current += entry.getValue();
                 if (current >= target) {
                     return Collections.singletonList(dataPointFactory.createDataPoint(returnTime, entry.getKey()));

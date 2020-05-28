@@ -37,9 +37,9 @@ abstract class AbstractHistogramTest {
             HistogramUtils::createHistogramV2;
     private static final BiFunction<Long, Iterable<Double>, DataPoint> CREATE_HISTOGRAM_V1_FROM_VALUES =
             HistogramUtils::createHistogramV1;
-    private static final BiFunction<Long, Map<Double, Integer>, DataPoint> CREATE_HISTOGRAM_V2_FROM_COUNTS =
+    private static final BiFunction<Long, Map<Double, Long>, DataPoint> CREATE_HISTOGRAM_V2_FROM_COUNTS =
             HistogramUtils::createHistogramV2;
-    private static final BiFunction<Long, Map<Double, Integer>, DataPoint> CREATE_HISTOGRAM_V1_FROM_COUNTS =
+    private static final BiFunction<Long, Map<Double, Long>, DataPoint> CREATE_HISTOGRAM_V1_FROM_COUNTS =
             HistogramUtils::createHistogramV1;
 
     /**
@@ -81,7 +81,7 @@ abstract class AbstractHistogramTest {
     public static Collection<Object[]> createParametersForHistogramFromCounts(
             final Collection<Object> parametersPerFactory) {
         final List<Object[]> parameterSets = new ArrayList<>();
-        for (final BiFunction<Long, Map<Double, Integer>, DataPoint> factory : getHistogramFactoriesFromCounts()) {
+        for (final BiFunction<Long, Map<Double, Long>, DataPoint> factory : getHistogramFactoriesFromCounts()) {
             final Object[] parameters = new Object[parametersPerFactory.size() + 1];
 
             // The first parameter is the factory
@@ -120,7 +120,7 @@ abstract class AbstractHistogramTest {
      *
      * @return {@link Iterable} of histogram factories.
      */
-    public static Iterable<BiFunction<Long, Map<Double, Integer>, DataPoint>> getHistogramFactoriesFromCounts() {
+    public static Iterable<BiFunction<Long, Map<Double, Long>, DataPoint>> getHistogramFactoriesFromCounts() {
         return Arrays.asList(
                 CREATE_HISTOGRAM_V1_FROM_COUNTS,
                 CREATE_HISTOGRAM_V2_FROM_COUNTS);

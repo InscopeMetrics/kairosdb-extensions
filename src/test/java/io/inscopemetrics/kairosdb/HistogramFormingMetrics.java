@@ -33,7 +33,7 @@ import javax.annotation.Nullable;
 public class HistogramFormingMetrics implements Metrics {
 
     private final int precision;
-    private final Map<Double, Integer> histogram = Maps.newHashMap();
+    private final Map<Double, Long> histogram = Maps.newHashMap();
     private Double sum = 0d;
     private Double max;
     private Double min;
@@ -140,7 +140,7 @@ public class HistogramFormingMetrics implements Metrics {
         return null;
     }
 
-    public Map<Double, Integer> getHistogram() {
+    public Map<Double, Long> getHistogram() {
         return histogram;
     }
 
@@ -164,7 +164,7 @@ public class HistogramFormingMetrics implements Metrics {
         return sum / count;
     }
 
-    private void recordValue(final double value, final int bucketCount) {
+    private void recordValue(final double value, final long bucketCount) {
         final HistogramKeyUtility keyUtility = HistogramKeyUtility.getInstance(precision);
         histogram.merge(keyUtility.truncateToDouble(value), bucketCount, (i, j) -> i + j);
         if (min == null || value < min) {

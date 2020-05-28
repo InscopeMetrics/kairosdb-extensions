@@ -61,7 +61,7 @@ public class HistogramDataPointV2Factory implements DataPointFactory {
 
     @Override
     public DataPoint getDataPoint(final long timestamp, final JsonElement json) {
-        final TreeMap<Double, Integer> binValues = new TreeMap<>();
+        final TreeMap<Double, Long> binValues = new TreeMap<>();
 
         final JsonObject object = json.getAsJsonObject();
         final double min = object.get("min").getAsDouble();
@@ -71,7 +71,7 @@ public class HistogramDataPointV2Factory implements DataPointFactory {
         final JsonObject bins = object.get("bins").getAsJsonObject();
 
         for (final Map.Entry<String, JsonElement> entry : bins.entrySet()) {
-            binValues.put(Double.parseDouble(entry.getKey()), entry.getValue().getAsInt());
+            binValues.put(Double.parseDouble(entry.getKey()), entry.getValue().getAsLong());
         }
 
         final byte precision = Optional.ofNullable(object.get("precision")).map(JsonElement::getAsByte).orElse((byte) 7);
@@ -88,7 +88,7 @@ public class HistogramDataPointV2Factory implements DataPointFactory {
         final int precision = protoData.getPrecision();
         final HistogramKeyUtility keyUtility = HistogramKeyUtility.getInstance(precision);
 
-        final TreeMap<Double, Integer> bins = protoData.getHistogramMap()
+        final TreeMap<Double, Long> bins = protoData.getHistogramMap()
                 .entrySet()
                 .stream()
                 .collect(

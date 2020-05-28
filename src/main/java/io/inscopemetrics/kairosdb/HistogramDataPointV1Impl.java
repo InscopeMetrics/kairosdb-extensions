@@ -40,7 +40,7 @@ public class HistogramDataPointV1Impl extends DataPointHelper implements Histogr
 
     @SuppressFBWarnings("URF_UNREAD_FIELD")
     private final int precision;
-    private final TreeMap<Double, Integer> map;
+    private final TreeMap<Double, Long> map;
     private final double min;
     private final double max;
     private final double mean;
@@ -59,7 +59,7 @@ public class HistogramDataPointV1Impl extends DataPointHelper implements Histogr
      */
     public HistogramDataPointV1Impl(
             final long timestamp,
-            final TreeMap<Double, Integer> map,
+            final TreeMap<Double, Long> map,
             final double min,
             final double max,
             final double mean,
@@ -87,7 +87,7 @@ public class HistogramDataPointV1Impl extends DataPointHelper implements Histogr
      */
     public HistogramDataPointV1Impl(
             final long timestamp,
-            final TreeMap<Double, Integer> map,
+            final TreeMap<Double, Long> map,
             final double min,
             final double max,
             final double mean,
@@ -118,7 +118,7 @@ public class HistogramDataPointV1Impl extends DataPointHelper implements Histogr
     public HistogramDataPointV1Impl(
             final long timestamp,
             final int precision,
-            final TreeMap<Double, Integer> map,
+            final TreeMap<Double, Long> map,
             final double min,
             final double max,
             final double mean,
@@ -150,7 +150,7 @@ public class HistogramDataPointV1Impl extends DataPointHelper implements Histogr
     public HistogramDataPointV1Impl(
             final long timestamp,
             final int precision,
-            final TreeMap<Double, Integer> map,
+            final TreeMap<Double, Long> map,
             final double min,
             final double max,
             final double mean,
@@ -170,9 +170,9 @@ public class HistogramDataPointV1Impl extends DataPointHelper implements Histogr
     @Override
     public void writeValueToBuffer(final DataOutput buffer) throws IOException {
         buffer.writeInt(map.size());
-        for (Map.Entry<Double, Integer> entry : map.entrySet()) {
+        for (Map.Entry<Double, Long> entry : map.entrySet()) {
             buffer.writeDouble(entry.getKey());
-            buffer.writeInt(entry.getValue());
+            buffer.writeInt(entry.getValue().intValue());
         }
         buffer.writeDouble(min);
         buffer.writeDouble(max);
@@ -184,7 +184,7 @@ public class HistogramDataPointV1Impl extends DataPointHelper implements Histogr
     public void writeValueToJson(final JSONWriter writer) throws JSONException {
         writer.object().key("bins");
         writer.object();
-        for (Map.Entry<Double, Integer> entry : map.entrySet()) {
+        for (Map.Entry<Double, Long> entry : map.entrySet()) {
             writer.key(entry.getKey().toString()).value(entry.getValue());
         }
         writer.endObject();
@@ -243,7 +243,7 @@ public class HistogramDataPointV1Impl extends DataPointHelper implements Histogr
     @Override
     public long getSampleCount() {
         long count = 0;
-        for (Integer binSamples : map.values()) {
+        for (final Long binSamples : map.values()) {
             count += binSamples;
         }
         return count;
@@ -265,7 +265,7 @@ public class HistogramDataPointV1Impl extends DataPointHelper implements Histogr
     }
 
     @Override
-    public TreeMap<Double, Integer> getMap() {
+    public TreeMap<Double, Long> getMap() {
         return map;
     }
 }

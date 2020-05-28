@@ -74,10 +74,10 @@ public class HistogramStdDevAggregator extends RangeAggregator {
                 final DataPoint dp = dataPointRange.next();
                 if (dp instanceof HistogramDataPoint) {
                     final HistogramDataPoint hist = (HistogramDataPoint) dp;
-                    final NavigableMap<Double, Integer> map = hist.getMap();
+                    final NavigableMap<Double, Long> map = hist.getMap();
                     if (map != null) {
-                        for (Map.Entry<Double, Integer> entry : map.entrySet()) {
-                            final int n = entry.getValue();
+                        for (Map.Entry<Double, Long> entry : map.entrySet()) {
+                            final long n = entry.getValue();
                             if (n > 0) {
                                 final double x = entry.getKey();
                                 count += n;

@@ -30,11 +30,11 @@ public class HistogramDataPointV2ImplTest {
 
     @Test
     public void testLargeSampleCount() {
-        final TreeMap<Double, Integer> map = new TreeMap<>();
-        map.put(1d, 2147483647);
-        map.put(2d, 2147483647);
-        map.put(3d, 2147483647);
-        map.put(4d, 2147483647);
+        final TreeMap<Double, Long> map = new TreeMap<>();
+        map.put(1d, 2147483647L);
+        map.put(2d, 2147483647L);
+        map.put(3d, 2147483647L);
+        map.put(4d, 2147483647L);
         final HistogramDataPointV2Impl dp = new HistogramDataPointV2Impl(1, 7, map, -10, 10, 10, 10);
         assertEquals(8589934588L, dp.getSampleCount());
     }

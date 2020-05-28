@@ -35,7 +35,7 @@ import java.util.TreeMap;
  */
 public class HistogramDataPointV2Impl extends DataPointHelper implements HistogramDataPoint {
     private final int precision;
-    private final TreeMap<Double, Integer> map;
+    private final TreeMap<Double, Long> map;
     private final double min;
     private final double max;
     private final double mean;
@@ -57,7 +57,7 @@ public class HistogramDataPointV2Impl extends DataPointHelper implements Histogr
     public HistogramDataPointV2Impl(
             final long timestamp,
             final int precision,
-            final TreeMap<Double, Integer> map,
+            final TreeMap<Double, Long> map,
             final double min,
             final double max,
             final double mean,
@@ -89,7 +89,7 @@ public class HistogramDataPointV2Impl extends DataPointHelper implements Histogr
     public HistogramDataPointV2Impl(
             final long timestamp,
             final int precision,
-            final TreeMap<Double, Integer> map,
+            final TreeMap<Double, Long> map,
             final double min,
             final double max,
             final double mean,
@@ -125,7 +125,7 @@ public class HistogramDataPointV2Impl extends DataPointHelper implements Histogr
         final FormatV2.DataPoint.Builder builder = FormatV2.DataPoint.newBuilder();
         final HistogramKeyUtility keyUtility = HistogramKeyUtility.getInstance(precision);
 
-        for (final Map.Entry<Double, Integer> entry : map.entrySet()) {
+        for (final Map.Entry<Double, Long> entry : map.entrySet()) {
             builder.putHistogram(keyUtility.pack(entry.getKey()), entry.getValue());
         }
 
@@ -145,7 +145,7 @@ public class HistogramDataPointV2Impl extends DataPointHelper implements Histogr
     public void writeValueToJson(final JSONWriter writer) throws JSONException {
         writer.object().key("bins");
         writer.object();
-        for (final Map.Entry<Double, Integer> entry : map.entrySet()) {
+        for (final Map.Entry<Double, Long> entry : map.entrySet()) {
             writer.key(entry.getKey().toString()).value(entry.getValue());
         }
         writer.endObject();
@@ -194,7 +194,7 @@ public class HistogramDataPointV2Impl extends DataPointHelper implements Histogr
 
     private long computeSampleCount() {
         long count = 0;
-        for (final Integer binSamples : map.values()) {
+        for (final Long binSamples : map.values()) {
             count += binSamples;
         }
         return count;
@@ -227,7 +227,7 @@ public class HistogramDataPointV2Impl extends DataPointHelper implements Histogr
     }
 
     @Override
-    public TreeMap<Double, Integer> getMap() {
+    public TreeMap<Double, Long> getMap() {
         return map;
     }
 }

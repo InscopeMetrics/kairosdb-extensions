@@ -44,9 +44,9 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Parameterized.class)
 public final class HistogramCountAggregatorTest extends AbstractHistogramTest {
 
-    private final BiFunction<Long, Map<Double, Integer>, DataPoint> histogramCreatorFromCounts;
+    private final BiFunction<Long, Map<Double, Long>, DataPoint> histogramCreatorFromCounts;
 
-    public HistogramCountAggregatorTest(final BiFunction<Long, Map<Double, Integer>, DataPoint> histogramCreatorFromCounts) {
+    public HistogramCountAggregatorTest(final BiFunction<Long, Map<Double, Long>, DataPoint> histogramCreatorFromCounts) {
         this.histogramCreatorFromCounts = histogramCreatorFromCounts;
     }
 
@@ -57,8 +57,8 @@ public final class HistogramCountAggregatorTest extends AbstractHistogramTest {
 
     @Test
     public void testCombineLargeValues() throws KairosDBException {
-        final TreeMap<Double, Integer> bins = Maps.newTreeMap();
-        bins.put(1d, 2147483647);
+        final TreeMap<Double, Long> bins = Maps.newTreeMap();
+        bins.put(1d, 2147483647L);
 
         final DataPoint dp = histogramCreatorFromCounts.apply(1L, bins);
         final ListDataPointGroup group = new ListDataPointGroup("testCombineLargeValues");

@@ -29,11 +29,11 @@ import static org.junit.Assert.assertEquals;
 public class HistogramDatapointV1ImplTest {
     @Test
     public void testLargeSampleCount() {
-        final TreeMap<Double, Integer> map = new TreeMap<>();
-        map.put(1d, 2147483647);
-        map.put(2d, 2147483647);
-        map.put(3d, 2147483647);
-        map.put(4d, 2147483647);
+        final TreeMap<Double, Long> map = new TreeMap<>();
+        map.put(1d, 2147483647L);
+        map.put(2d, 2147483647L);
+        map.put(3d, 2147483647L);
+        map.put(4d, 2147483647L);
         final HistogramDataPointV1Impl dp = new HistogramDataPointV1Impl(1, map, -10, 10, 10, 10);
         assertEquals(8589934588L, dp.getSampleCount());
     }

@@ -52,7 +52,7 @@ public class HistogramDataPointFactory implements DataPointFactory {
 
     @Override
     public DataPoint getDataPoint(final long timestamp, final JsonElement json) {
-        final TreeMap<Double, Integer> binValues = new TreeMap<>();
+        final TreeMap<Double, Long> binValues = new TreeMap<>();
 
         final JsonObject object = json.getAsJsonObject();
         final double min = getFiniteDouble(object, "min");
@@ -64,7 +64,7 @@ public class HistogramDataPointFactory implements DataPointFactory {
         for (Map.Entry<String, JsonElement> entry : bins.entrySet()) {
             binValues.put(
                     ensureFinite(Double.parseDouble(entry.getKey()), "bucket"),
-                    entry.getValue().getAsInt()
+                    entry.getValue().getAsLong()
             );
         }
 
@@ -73,12 +73,12 @@ public class HistogramDataPointFactory implements DataPointFactory {
 
     @Override
     public DataPoint getDataPoint(final long timestamp, final DataInput buffer) throws IOException {
-        final TreeMap<Double, Integer> bins = new TreeMap<>();
+        final TreeMap<Double, Long> bins = new TreeMap<>();
         final int binCount = buffer.readInt();
         for (int i = 0; i < binCount; i++) {
             bins.put(
                     ensureFinite(buffer.readDouble(), "bucket"),
-                    buffer.readInt()
+                    (long) buffer.readInt()
             );
         }
 
