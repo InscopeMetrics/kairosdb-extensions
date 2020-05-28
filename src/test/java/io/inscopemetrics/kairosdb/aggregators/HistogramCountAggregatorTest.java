@@ -17,16 +17,21 @@
 package io.inscopemetrics.kairosdb.aggregators;
 
 import com.google.common.collect.Maps;
-import io.inscopemetrics.kairosdb.HistogramDataPoint;
-import io.inscopemetrics.kairosdb.HistogramDataPointImpl;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.datapoints.DoubleDataPoint;
 import org.kairosdb.core.datapoints.DoubleDataPointFactoryImpl;
 import org.kairosdb.core.datastore.DataPointGroup;
 import org.kairosdb.core.exception.KairosDBException;
 import org.kairosdb.testing.ListDataPointGroup;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.BiFunction;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -36,19 +41,26 @@ import static org.junit.Assert.assertTrue;
  *
  * @author William Ehlhardt (whale at dropbox dot com)
  */
-public class HistogramCountAggregatorTest {
+@RunWith(Parameterized.class)
+public final class HistogramCountAggregatorTest extends AbstractHistogramTest {
+
+    private final BiFunction<Long, Map<Double, Integer>, DataPoint> histogramCreatorFromCounts;
+
+    public HistogramCountAggregatorTest(final BiFunction<Long, Map<Double, Integer>, DataPoint> histogramCreatorFromCounts) {
+        this.histogramCreatorFromCounts = histogramCreatorFromCounts;
+    }
+
+    @Parameterized.Parameters
+    public static Collection<Object[]> parameters() {
+        return createParametersForHistogramFromCounts(Collections.emptyList());
+    }
 
     @Test
     public void testCombineLargeValues() throws KairosDBException {
-        final double min = Double.MAX_VALUE;
-        final double max = -Double.MAX_VALUE;
-        final double sum = 0;
         final TreeMap<Double, Integer> bins = Maps.newTreeMap();
-        bins.put(1337d, 2147483647);
-        final double mean =  1337d;
+        bins.put(1d, 2147483647);
 
-        final HistogramDataPoint dp = new HistogramDataPointImpl(
-                1L, bins,  min, max, mean, sum);
+        final DataPoint dp = histogramCreatorFromCounts.apply(1L, bins);
         final ListDataPointGroup group = new ListDataPointGroup("testCombineLargeValues");
         group.addDataPoint(dp);
         group.addDataPoint(dp);

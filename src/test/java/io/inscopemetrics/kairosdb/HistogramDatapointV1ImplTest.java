@@ -22,11 +22,11 @@ import java.util.TreeMap;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Test class for {@link HistogramDataPointImpl}.
+ * Test class for {@link HistogramDataPointV1Impl}.
  *
  * @author William Ehlhardt (whale at dropbox dot com)
  */
-public class HistogramDatapointImplTest {
+public class HistogramDatapointV1ImplTest {
     @Test
     public void testLargeSampleCount() {
         final TreeMap<Double, Integer> map = new TreeMap<>();
@@ -34,7 +34,7 @@ public class HistogramDatapointImplTest {
         map.put(2d, 2147483647);
         map.put(3d, 2147483647);
         map.put(4d, 2147483647);
-        final HistogramDataPointImpl dp = new HistogramDataPointImpl(1, map, -10, 10, 10, 10);
+        final HistogramDataPointV1Impl dp = new HistogramDataPointV1Impl(1, map, -10, 10, 10, 10);
         assertEquals(8589934588L, dp.getSampleCount());
     }
 }

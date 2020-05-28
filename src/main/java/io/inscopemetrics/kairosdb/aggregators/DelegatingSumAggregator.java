@@ -24,7 +24,7 @@ import javax.inject.Named;
 /**
  * Sum aggregator that delegates to the built-in and the histogram aggregators.
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 @FeatureComponent(
         name = "sum",

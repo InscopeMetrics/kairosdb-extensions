@@ -44,7 +44,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests for storing histogram datapoints.
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public final class AggregationIT {
     private static final List<Histogram> SINGLE_HIST_TEST_DATA = Lists.newArrayList(
@@ -219,7 +219,8 @@ public final class AggregationIT {
     // ****  merge aggregator ***
     @Test
     public void testMergeAggregatorSingle() throws IOException, JSONException {
-        testAggregate("merge", SINGLE_HIST_TEST_DATA, SINGLE_HIST_TEST_DATA.get(0));
+        final Histogram merged = new Histogram(Arrays.asList(1d, 3d, 5d, 7d, 9d, 1d, 9d, 1d, 9d), (byte) 7);
+        testAggregate("merge", SINGLE_HIST_TEST_DATA, merged);
     }
 
     @Test
@@ -233,7 +234,7 @@ public final class AggregationIT {
             }
         }
 
-        final Histogram merged = new Histogram(numbers);
+        final Histogram merged = new Histogram(numbers, (byte) 7);
         testAggregate("merge", MULTI_HIST_TEST_DATA, merged);
     }
 
@@ -249,31 +250,31 @@ public final class AggregationIT {
     @Test
     public void testFilterAggregatorSingle() throws IOException, JSONException {
         final List<Histogram> expected = Lists.newArrayList(
-                new Histogram(Arrays.asList(5d, 7d, 9d, 9d, 9d)));
+                new Histogram(Arrays.asList(5d, 7d, 9d, 9d, 9d), (byte) 7));
         testAggregate("filter", SINGLE_HIST_TEST_DATA, expected, filterParam("lt", "keep", 5d));
     }
 
     @Test
     public void testFilterAggregatorMulti() throws IOException, JSONException {
         final List<Histogram> expected = Lists.newArrayList(
-                new Histogram(Arrays.asList(9d, 9d, 8d, 12d)),
-                new Histogram(Arrays.asList(18d, 18d, 20d, 20d)));
+                new Histogram(Arrays.asList(9d, 9d, 8d, 12d), (byte) 7),
+                new Histogram(Arrays.asList(18d, 18d, 20d, 20d), (byte) 7));
         testAggregate("filter", MULTI_HIST_TEST_DATA, expected, filterParam("lt", "keep", 5d));
     }
 
     @Test
     public void testFilterAggregatorMissingIndeterminateField() throws IOException, JSONException {
         final List<Histogram> expected = Lists.newArrayList(
-                new Histogram(Arrays.asList(5d, 7d, 9d, 9d, 9d)));
+                new Histogram(Arrays.asList(5d, 7d, 9d, 9d, 9d), (byte) 7));
         testAggregate("filter", SINGLE_HIST_TEST_DATA, expected, filterParam("lt", 5d));
     }
 
     @Test
     public void testFilterAroundZero() throws IOException, JSONException {
         final List<Histogram> input = Lists.newArrayList(new Histogram(Arrays.asList(100d, 0d, -0d, -110d)));
-        final List<Histogram> expectedPositiveBins = Lists.newArrayList(new Histogram(Arrays.asList(100d, 0d)));
+        final List<Histogram> expectedPositiveBins = Lists.newArrayList(new Histogram(Arrays.asList(100d, 0d), (byte) 7));
         testAggregate("filter", input, expectedPositiveBins, filterParam("lte", "keep", +0d));
-        final List<Histogram> expectedNegativeBins = Lists.newArrayList(new Histogram(Arrays.asList(-0d, -110d)));
+        final List<Histogram> expectedNegativeBins = Lists.newArrayList(new Histogram(Arrays.asList(-0d, -110d), (byte) 7));
         testAggregate("filter", input, expectedNegativeBins, filterParam("gte", "keep", -0d));
     }
 
@@ -628,7 +629,16 @@ public final class AggregationIT {
             final int expectedCode) throws JSONException, IOException {
         final HttpPost post = KairosHelper.postHistogram(timestamp, histogram, metricName);
         try (CloseableHttpResponse response = client.execute(post)) {
-            assertEquals(expectedCode, response.getStatusLine().getStatusCode());
+            final String message;
+            if (response.getEntity() != null) {
+                message = CharStreams.toString(new InputStreamReader(response.getEntity().getContent(), Charsets.UTF_8));
+            } else {
+                message = "<No Response Entity>";
+            }
+            assertEquals(
+                    message,
+                    expectedCode,
+                    response.getStatusLine().getStatusCode());
         }
     }
 

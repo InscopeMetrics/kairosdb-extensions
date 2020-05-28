@@ -30,7 +30,7 @@ import javax.inject.Provider;
 /**
  * Serves as a base for an aggregator that will delegate and intelligently dispatch aggregation to appropriate classes.
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class DelegatingRangeAggregator extends RangeAggregator {
     private static final Logger LOGGER = LoggerFactory.getLogger(DelegatingRangeAggregator.class);

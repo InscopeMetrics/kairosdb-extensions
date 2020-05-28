@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 /**
  * Allows peeking on a DataPointGroup's iterator.
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class PeekableDataPointGroup implements DataPointGroup {
     private final DataPointGroup wrapped;

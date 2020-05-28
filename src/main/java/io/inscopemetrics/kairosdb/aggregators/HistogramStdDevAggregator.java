@@ -17,12 +17,10 @@ package io.inscopemetrics.kairosdb.aggregators;
 
 import com.google.inject.Inject;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
-import io.inscopemetrics.kairosdb.HistogramDataPointFactory;
 import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.aggregator.RangeAggregator;
 import org.kairosdb.core.annotation.FeatureComponent;
 import org.kairosdb.core.datapoints.DoubleDataPointFactory;
-import org.kairosdb.core.exception.KairosDBException;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -44,10 +42,9 @@ public class HistogramStdDevAggregator extends RangeAggregator {
      * Public constructor.
      *
      * @param dataPointFactory A factory for creating DoubleDataPoints
-     * @throws KairosDBException on error
      */
     @Inject
-    public HistogramStdDevAggregator(final DoubleDataPointFactory dataPointFactory) throws KairosDBException {
+    public HistogramStdDevAggregator(final DoubleDataPointFactory dataPointFactory) {
         this.dataPointFactory = dataPointFactory;
     }
 
@@ -58,7 +55,7 @@ public class HistogramStdDevAggregator extends RangeAggregator {
 
     @Override
     public boolean canAggregate(final String groupType) {
-        return HistogramDataPointFactory.GROUP_TYPE.equals(groupType);
+        return HistogramDataPoint.GROUP_TYPE.equals(groupType);
     }
 
     @Override

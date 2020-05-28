@@ -18,7 +18,6 @@ package io.inscopemetrics.kairosdb.aggregators;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
-import io.inscopemetrics.kairosdb.HistogramDataPointFactory;
 import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.aggregator.RangeAggregator;
 import org.kairosdb.core.annotation.FeatureComponent;
@@ -36,7 +35,7 @@ import java.util.TreeMap;
 /**
  * Aggregator that computes a percentile of histograms.
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 @FeatureComponent(
         name = "hpercentile",
@@ -78,12 +77,12 @@ public final class HistogramPercentileAggregator extends RangeAggregator {
 
     @Override
     protected RangeSubAggregator getSubAggregator() {
-        return new HistogramMeanDataPointAggregator();
+        return new HistogramPercentileDataPointAggregator();
     }
 
     @Override
     public boolean canAggregate(final String groupType) {
-        return HistogramDataPointFactory.GROUP_TYPE.equals(groupType);
+        return HistogramDataPoint.GROUP_TYPE.equals(groupType);
     }
 
     @Override
@@ -91,7 +90,7 @@ public final class HistogramPercentileAggregator extends RangeAggregator {
         return dataPointFactory.getGroupType();
     }
 
-    private final class HistogramMeanDataPointAggregator implements RangeSubAggregator {
+    private final class HistogramPercentileDataPointAggregator implements RangeSubAggregator {
 
         @Override
         public Iterable<DataPoint> getNextDataPoints(final long returnTime, final Iterator<DataPoint> dataPointRange) {

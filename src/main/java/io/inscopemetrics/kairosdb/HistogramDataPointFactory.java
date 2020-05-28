@@ -26,19 +26,19 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Factory that creates {@link HistogramDataPointImpl}.
+ * Factory that creates {@link HistogramDataPointV1Impl}.
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * <b>VERSION NOTE:</b> This is the v1 factory, but was not renamed since it is
+ * referenced in KairosDb properties by fully qualified class name. It generates
+ * {@link DataPoint} implementations of type {@link HistogramDataPointV1Impl}.
+ *
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class HistogramDataPointFactory implements DataPointFactory {
     /**
      * Name of the Data Store Type.
      */
     public static final String DST = "kairos_histogram_v1";
-    /**
-     * Name of the group type.
-     */
-    public static final String GROUP_TYPE = "histogram";
 
     @Override
     public String getDataStoreType() {
@@ -47,11 +47,11 @@ public class HistogramDataPointFactory implements DataPointFactory {
 
     @Override
     public String getGroupType() {
-        return GROUP_TYPE;
+        return HistogramDataPoint.GROUP_TYPE;
     }
 
     @Override
-    public DataPoint getDataPoint(final long timestamp, final JsonElement json) throws IOException {
+    public DataPoint getDataPoint(final long timestamp, final JsonElement json) {
         final TreeMap<Double, Integer> binValues = new TreeMap<>();
 
         final JsonObject object = json.getAsJsonObject();
@@ -68,7 +68,7 @@ public class HistogramDataPointFactory implements DataPointFactory {
             );
         }
 
-        return new HistogramDataPointImpl(timestamp, binValues, min, max, mean, sum);
+        return new HistogramDataPointV1Impl(timestamp, binValues, min, max, mean, sum);
     }
 
     @Override
@@ -87,7 +87,7 @@ public class HistogramDataPointFactory implements DataPointFactory {
         final double mean = ensureFinite(buffer.readDouble(), "mean");
         final double sum = ensureFinite(buffer.readDouble(), "sum");
 
-        return new HistogramDataPointImpl(timestamp, bins, min, max, mean, sum);
+        return new HistogramDataPointV1Impl(timestamp, bins, min, max, mean, sum);
     }
 
     private double ensureFinite(final double x, final String name) {

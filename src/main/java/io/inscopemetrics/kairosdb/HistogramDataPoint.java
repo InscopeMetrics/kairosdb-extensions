@@ -25,6 +25,12 @@ import java.util.NavigableMap;
  * @author Gil Markham (gmarkham at dropbox dot com)
  */
 public interface HistogramDataPoint extends DataPoint {
+
+    /**
+     * Name of the group type.
+     */
+    String GROUP_TYPE = "histogram";
+
     /**
      * Getter the number of data points originally contained in this HistogramDataPoint.
      * @return datapoint sample count
@@ -54,6 +60,12 @@ public interface HistogramDataPoint extends DataPoint {
      * @return max of histogram samples
      */
     double getMax();
+
+    /**
+     * Getter for the precision value of the samples contained in this HistogramDataPoint.
+     * @return precision in bits
+     */
+    int getPrecision();
 
     /**
      * Getter for the map of lower bucket value to sample count contained in this HistogramDataPoint.

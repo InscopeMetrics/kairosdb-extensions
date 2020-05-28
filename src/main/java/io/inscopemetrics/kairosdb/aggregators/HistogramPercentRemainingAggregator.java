@@ -17,13 +17,11 @@ package io.inscopemetrics.kairosdb.aggregators;
 
 import com.google.inject.Inject;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
-import io.inscopemetrics.kairosdb.HistogramDataPointFactory;
 import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.aggregator.AggregatedDataPointGroupWrapper;
 import org.kairosdb.core.annotation.FeatureComponent;
 import org.kairosdb.core.datapoints.DoubleDataPointFactory;
 import org.kairosdb.core.datastore.DataPointGroup;
-import org.kairosdb.core.exception.KairosDBException;
 import org.kairosdb.plugin.Aggregator;
 
 import java.util.NoSuchElementException;
@@ -43,10 +41,9 @@ public class HistogramPercentRemainingAggregator implements Aggregator {
      * Public Constructor.
      *
      * @param dataPointFactory A factory for creating DoubleDataPoints
-     * @throws KairosDBException on error
      */
     @Inject
-    public HistogramPercentRemainingAggregator(final DoubleDataPointFactory dataPointFactory) throws KairosDBException {
+    public HistogramPercentRemainingAggregator(final DoubleDataPointFactory dataPointFactory) {
         this.dataPointFactory = dataPointFactory;
     }
 
@@ -57,12 +54,12 @@ public class HistogramPercentRemainingAggregator implements Aggregator {
 
     @Override
     public boolean canAggregate(final String groupType) {
-        return HistogramDataPointFactory.GROUP_TYPE.equals(groupType);
+        return HistogramDataPoint.GROUP_TYPE.equals(groupType);
     }
 
     @Override
     public String getAggregatedGroupType(final String groupType) {
-        return HistogramDataPointFactory.GROUP_TYPE;
+        return dataPointFactory.getGroupType();
     }
 
     private class HistogramPercentRemainingDataPointAggregator extends AggregatedDataPointGroupWrapper {

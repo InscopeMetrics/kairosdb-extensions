@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 SmartSheet.com
+ * Copyright 2019 Inscope Metrics, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,10 @@
  */
 package io.inscopemetrics.kairosdb;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
+import io.inscopemetrics.kairosdb.proto.v2.FormatV2;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.kairosdb.core.datapoints.DataPointHelper;
@@ -28,77 +31,17 @@ import java.util.TreeMap;
 /**
  * DataPoint that represents a Histogram.
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
-public class HistogramDataPointImpl extends DataPointHelper implements HistogramDataPoint {
-    private static final String API_TYPE = "histogram";
-    private static final int DEFAULT_PRECISION = 7;
-
-    @SuppressFBWarnings("URF_UNREAD_FIELD")
+public class HistogramDataPointV2Impl extends DataPointHelper implements HistogramDataPoint {
     private final int precision;
     private final TreeMap<Double, Integer> map;
     private final double min;
     private final double max;
     private final double mean;
     private final double sum;
-    private final long originalCount;
-
-    /**
-     * Public constructor.
-     *
-     * @param timestamp the timestamp.
-     * @param map the bins with values
-     * @param min the minimum value in the histogram
-     * @param max the maximum value in the histogram
-     * @param mean the mean value in the histogram
-     * @param sum the sum of all the values in the histogram
-     */
-    public HistogramDataPointImpl(
-            final long timestamp,
-            final TreeMap<Double, Integer> map,
-            final double min,
-            final double max,
-            final double mean,
-            final double sum) {
-        this(
-                timestamp,
-                DEFAULT_PRECISION,
-                map,
-                min,
-                max,
-                mean,
-                sum);
-    }
-
-    /**
-     * Public constructor.
-     *
-     * @param timestamp the timestamp.
-     * @param map the bins with values
-     * @param min the minimum value in the histogram
-     * @param max the maximum value in the histogram
-     * @param mean the mean value in the histogram
-     * @param sum the sum of all the values in the histogram
-     * @param originalCount the original number of data points that this histogram represented
-     */
-    public HistogramDataPointImpl(
-            final long timestamp,
-            final TreeMap<Double, Integer> map,
-            final double min,
-            final double max,
-            final double mean,
-            final double sum,
-            final long originalCount) {
-        this(
-                timestamp,
-                DEFAULT_PRECISION,
-                map,
-                min,
-                max,
-                mean,
-                sum,
-                originalCount);
-    }
+    private final Supplier<Long> originalCountSupplier;
+    private final Supplier<Long> countSupplier;
 
     /**
      * Public constructor.
@@ -111,7 +54,7 @@ public class HistogramDataPointImpl extends DataPointHelper implements Histogram
      * @param mean the mean value in the histogram
      * @param sum the sum of all the values in the histogram
      */
-    public HistogramDataPointImpl(
+    public HistogramDataPointV2Impl(
             final long timestamp,
             final int precision,
             final TreeMap<Double, Integer> map,
@@ -126,9 +69,9 @@ public class HistogramDataPointImpl extends DataPointHelper implements Histogram
         this.max = max;
         this.mean = mean;
         this.sum = sum;
-        this.originalCount = getSampleCount();
+        countSupplier = Suppliers.memoize(this::computeSampleCount);
+        originalCountSupplier = Suppliers.memoize(countSupplier);
     }
-
 
     /**
      * Public constructor.
@@ -143,7 +86,7 @@ public class HistogramDataPointImpl extends DataPointHelper implements Histogram
      * @param originalCount the original number of data points that this histogram represented
      */
     // CHECKSTYLE.OFF: ParameterNumber
-    public HistogramDataPointImpl(
+    public HistogramDataPointV2Impl(
             final long timestamp,
             final int precision,
             final TreeMap<Double, Integer> map,
@@ -159,28 +102,50 @@ public class HistogramDataPointImpl extends DataPointHelper implements Histogram
         this.max = max;
         this.mean = mean;
         this.sum = sum;
-        this.originalCount = originalCount;
+        countSupplier = Suppliers.memoize(this::computeSampleCount);
+        originalCountSupplier = Suppliers.ofInstance(originalCount);
     }
     // CHECKSTYLE.ON: ParameterNumber
 
     @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("precision", precision)
+                .add("map", map)
+                .add("min", min)
+                .add("max", max)
+                .add("mean", mean)
+                .add("sum", sum)
+                .add("timestamp", m_timestamp)
+                .toString();
+    }
+
+    @Override
     public void writeValueToBuffer(final DataOutput buffer) throws IOException {
-        buffer.writeInt(map.size());
-        for (Map.Entry<Double, Integer> entry : map.entrySet()) {
-            buffer.writeDouble(entry.getKey());
-            buffer.writeInt(entry.getValue());
+        final FormatV2.DataPoint.Builder builder = FormatV2.DataPoint.newBuilder();
+        final HistogramKeyUtility keyUtility = HistogramKeyUtility.getInstance(precision);
+
+        for (final Map.Entry<Double, Integer> entry : map.entrySet()) {
+            builder.putHistogram(keyUtility.pack(entry.getKey()), entry.getValue());
         }
-        buffer.writeDouble(min);
-        buffer.writeDouble(max);
-        buffer.writeDouble(mean);
-        buffer.writeDouble(sum);
+
+        builder.setMax(max);
+        builder.setMin(min);
+        builder.setMean(mean);
+        builder.setSum(sum);
+        builder.setPrecision(precision);
+
+
+        final byte[] bytes = builder.build().toByteArray();
+        buffer.writeInt(bytes.length);
+        buffer.write(bytes);
     }
 
     @Override
     public void writeValueToJson(final JSONWriter writer) throws JSONException {
         writer.object().key("bins");
         writer.object();
-        for (Map.Entry<Double, Integer> entry : map.entrySet()) {
+        for (final Map.Entry<Double, Integer> entry : map.entrySet()) {
             writer.key(entry.getKey().toString()).value(entry.getValue());
         }
         writer.endObject();
@@ -188,17 +153,18 @@ public class HistogramDataPointImpl extends DataPointHelper implements Histogram
         writer.key("max").value(max);
         writer.key("mean").value(mean);
         writer.key("sum").value(sum);
+        writer.key("precision").value(precision);
         writer.endObject();
     }
 
     @Override
     public String getApiDataType() {
-        return API_TYPE;
+        return HistogramDataPoint.GROUP_TYPE;
     }
 
     @Override
     public String getDataStoreDataType() {
-        return HistogramDataPointFactory.DST;
+        return HistogramDataPointV2Factory.DST;
     }
 
     @Override
@@ -222,22 +188,27 @@ public class HistogramDataPointImpl extends DataPointHelper implements Histogram
     }
 
     @Override
-    public long getOriginalCount() {
-        return originalCount;
+    public long getSampleCount() {
+        return countSupplier.get();
     }
 
-    /**
-     * Gets the number of samples in the bins.
-     *
-     * @return the number of samples
-     */
-    @Override
-    public long getSampleCount() {
+    private long computeSampleCount() {
         long count = 0;
-        for (Integer binSamples : map.values()) {
+        for (final Integer binSamples : map.values()) {
             count += binSamples;
         }
         return count;
+    }
+
+    @Override
+    public long getOriginalCount() {
+        return originalCountSupplier.get();
+    }
+
+
+    @Override
+    public int getPrecision() {
+        return precision;
     }
 
     @Override

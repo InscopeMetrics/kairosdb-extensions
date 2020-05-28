@@ -29,7 +29,7 @@ import javax.inject.Provider;
  * Provides mapping of data types and data groups to the aggregators that can aggregate them.
  *
  * @param <T> type of aggregator that this class maps to
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class GenericAggregatorMap<T extends Aggregator> {
     private final List<Provider<? extends T>> providers;

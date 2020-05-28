@@ -86,12 +86,16 @@
     <joda.version>2.3</joda.version>
     <jsr305.version>2.0.2</jsr305.version>
     <kairosdb.version>1.2.1-1</kairosdb.version>
+    <kairosdb.format.version>0.1.0-SNAPSHOT</kairosdb.format.version>
     <org.json.version>chargebee-1.0</org.json.version>
     <slf4j.version>1.7.2</slf4j.version>
 
     <!-- Test Dependency Versions -->
+    <apache.math3.version>3.2</apache.math3.version>
     <hamcrest.version>2.2</hamcrest.version>
     <junit.version>4.13</junit.version>
+    <metrics.generator.version>1.2.2</metrics.generator.version>
+    <metrics.client.version>0.11.2</metrics.client.version>
     <mockito.version>2.23.4</mockito.version>
 
     <!-- Plugin Versions -->
@@ -100,8 +104,8 @@
     <rpm.maven.plugin.version>2.2.0</rpm.maven.plugin.version>
 
     <!-- Code Coverage -->
-    <jacoco.check.line.coverage>0.3</jacoco.check.line.coverage>
-    <jacoco.check.branch.coverage>0.5</jacoco.check.branch.coverage>
+    <jacoco.check.line.coverage>0.25</jacoco.check.line.coverage>
+    <jacoco.check.branch.coverage>0.37</jacoco.check.branch.coverage>
     <jacoco.check.cyclomatic.complexity>20.0</jacoco.check.cyclomatic.complexity>
 
     <!-- Assembly -->
@@ -251,7 +255,7 @@
                 </ports>
                 <volumes>
                   <bind>
-                    <volume>${project.basedir}/logs/docker:/opt/kairosdb/logs</volume>
+                    <volume>${project.basedir}/logs/docker:/opt/kairosdb/log</volume>
                   </bind>
                 </volumes>
                 <wait>
@@ -286,11 +290,11 @@
           <groupId>com.google.code.findbugs</groupId>
           <artifactId>findbugs-annotations</artifactId>
         </exclusion>
-          <!-- TODO(ville): Remove once KairosDb marks Hamcrest for test. -->
-          <exclusion>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-library</artifactId>
-          </exclusion>
+        <!-- TODO(ville): Remove once KairosDb marks Hamcrest for test. -->
+        <exclusion>
+          <groupId>org.hamcrest</groupId>
+          <artifactId>hamcrest-library</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -365,6 +369,11 @@
     </dependency>
     <!-- Dependencies -->
     <dependency>
+      <groupId>io.inscopemetrics.kairosdb</groupId>
+      <artifactId>format</artifactId>
+      <version>${kairosdb.format.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.github.spotbugs</groupId>
       <artifactId>spotbugs-annotations</artifactId>
       <version>${spotbugs.annotations.version}</version>
@@ -403,6 +412,38 @@
       <artifactId>mockito-core</artifactId>
       <version>${mockito.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math3</artifactId>
+      <version>${apache.math3.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.arpnetworking.metrics</groupId>
+      <artifactId>generator</artifactId>
+      <version>${metrics.generator.version}</version>
+      <scope>test</scope>
+      <exclusions>
+        <!-- TODO(ville): Remove suppression once KairosDb updates jsr305 dependency -->
+        <exclusion>
+          <groupId>com.google.code.findbugs</groupId>
+          <artifactId>jsr305</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.arpnetworking.metrics</groupId>
+      <artifactId>metrics-client</artifactId>
+      <version>${metrics.client.version}</version>
+      <scope>test</scope>
+      <exclusions>
+        <!-- TODO(ville): Remove suppression once KairosDb updates jsr305 dependency -->
+        <exclusion>
+          <groupId>com.google.code.findbugs</groupId>
+          <artifactId>jsr305</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 
