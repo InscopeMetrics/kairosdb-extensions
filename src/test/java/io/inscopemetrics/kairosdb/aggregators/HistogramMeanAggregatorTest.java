@@ -50,7 +50,7 @@ public final class HistogramMeanAggregatorTest extends AbstractHistogramTest {
         this.histogramCreatorFromCounts = histogramCreatorFromCounts;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{index}: {0}")
     public static Collection<Object[]> parameters() {
         return createParameters();
     }

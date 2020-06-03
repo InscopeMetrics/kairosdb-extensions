@@ -21,6 +21,7 @@ import com.carrotsearch.junitbenchmarks.BenchmarkRule;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.inscopemetrics.kairosdb.HistogramDataPointV2Factory;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
@@ -34,6 +35,7 @@ import java.nio.file.Paths;
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 @BenchmarkOptions(callgc = true, benchmarkRounds = 10, warmupRounds = 5)
+@Ignore
 public final class V2FactoryTestPerf extends BaseFactoryTestPerf {
 
     private static final JsonBenchmarkConsumer JSON_BENCHMARK_CONSUMER = new JsonBenchmarkConsumer(

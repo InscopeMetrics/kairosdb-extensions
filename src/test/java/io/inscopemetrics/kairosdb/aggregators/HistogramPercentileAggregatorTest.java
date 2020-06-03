@@ -45,7 +45,7 @@ public final class HistogramPercentileAggregatorTest extends AbstractHistogramTe
         this.histogramCreatorFromValues = histogramCreatorFromValues;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{index}: {0}")
     public static Collection<Object[]> parameters() {
         return createParametersFromValues();
     }

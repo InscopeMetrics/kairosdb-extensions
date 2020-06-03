@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Inscope Metrics
+ * Copyright 2020 Dropbox
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,26 +19,25 @@ import com.arpnetworking.test.junitbenchmarks.JsonBenchmarkConsumer;
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.carrotsearch.junitbenchmarks.BenchmarkRule;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import io.inscopemetrics.kairosdb.HistogramDataPointFactory;
+import io.inscopemetrics.kairosdb.accumulators.BigDecimalAccumulator;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+
 /**
- * Performance test for data point factories.
+ * Performance test for {@link BigDecimalAccumulator}.
  *
- * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 @BenchmarkOptions(callgc = true, benchmarkRounds = 10, warmupRounds = 5)
-@Ignore
-public final class V1FactoryTestPerf extends BaseFactoryTestPerf {
+public final class BigDecimalAccumulatorTestPerf extends BaseAccumulatorTestPerf {
 
     private static final JsonBenchmarkConsumer JSON_BENCHMARK_CONSUMER = new JsonBenchmarkConsumer(
-            Paths.get("target/perf/factory-v1-performance-test.json"));
+            Paths.get("target/perf/bigdecimal-accumulator-performance-test.json"));
     @Rule
     @SuppressFBWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
     public final TestRule benchMarkRule = new BenchmarkRule(JSON_BENCHMARK_CONSUMER);
@@ -50,6 +49,6 @@ public final class V1FactoryTestPerf extends BaseFactoryTestPerf {
 
     @Test
     public void serializeSize() throws IOException {
-        runTest(new HistogramDataPointFactory());
+        runTest(new BigDecimalAccumulator());
     }
 }

@@ -67,7 +67,7 @@ public final class HistogramPercentRemainingAggregatorTest extends AbstractHisto
                 histogramCreatorFromValues.create(3L, Arrays.asList(30d, 40d, 50d, 60d)));
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{index}: {0}")
     public static Collection<Object[]> parameters() {
         return createParametersFromValues();
     }

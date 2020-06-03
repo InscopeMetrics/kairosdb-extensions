@@ -66,7 +66,7 @@ public final class HistogramFilterAggregatorTest extends AbstractHistogramTest {
         this.histogramCreatorFromValues = histogramCreatorFromValues;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{index}: {0}")
     public static Collection<Object[]> parameters() {
         return createParametersFromValues();
     }

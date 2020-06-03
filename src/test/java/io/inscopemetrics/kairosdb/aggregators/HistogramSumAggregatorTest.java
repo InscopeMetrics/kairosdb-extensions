@@ -41,12 +41,11 @@ public final class HistogramSumAggregatorTest extends AbstractHistogramTest {
 
     private final CreateHistogramFromValues histogramCreatorFromValues;
 
-    public HistogramSumAggregatorTest(
-            final CreateHistogramFromValues histogramCreatorFromValues) {
+    public HistogramSumAggregatorTest(final CreateHistogramFromValues histogramCreatorFromValues) {
         this.histogramCreatorFromValues = histogramCreatorFromValues;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{index}: {0}")
     public static Collection<Object[]> parameters() {
         return createParametersFromValues();
     }
@@ -71,6 +70,24 @@ public final class HistogramSumAggregatorTest extends AbstractHistogramTest {
         resultDataPoint = (DoubleDataPoint) result.next();
         assertEquals(12.0, resultDataPoint.getDoubleValue(), 0.0001);
 
+        assertFalse(result.hasNext());
+    }
+
+    @Test
+    public void testDifferentMagnitudes() {
+        final ListDataPointGroup group = new ListDataPointGroup("HistogramSumAggregator.testDifferentMagnitudes");
+        group.addDataPoint(histogramCreatorFromValues.create(1L, Arrays.asList(1.0e16)));
+        for (int i = 0; i < 1000000; ++i) {
+            group.addDataPoint(histogramCreatorFromValues.create(1L, Arrays.asList(1.0)));
+        }
+
+        final HistogramSumAggregator aggregator = new HistogramSumAggregator(new DoubleDataPointFactoryImpl());
+
+        final DataPointGroup result = aggregator.aggregate(group);
+        DoubleDataPoint resultDataPoint;
+        assertTrue(result.hasNext());
+        resultDataPoint = (DoubleDataPoint) result.next();
+        assertEquals(1.0000000001E16, resultDataPoint.getDoubleValue(), 0.0001);
         assertFalse(result.hasNext());
     }
 }
