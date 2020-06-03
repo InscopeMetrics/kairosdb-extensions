@@ -57,19 +57,19 @@ public final class HistogramPercentRemainingAggregatorTest extends AbstractHisto
     private HistogramFilterAggregator filterAggregator;
     private HistogramMergeAggregator mergeAggregator;
 
-    public HistogramPercentRemainingAggregatorTest(final CreateHistogramFromValues histogramCreator) {
-        singleHistGroup = Collections.singletonList(histogramCreator.create(1L, Arrays.asList(1d, 10d, 100d, 1000d)));
+    public HistogramPercentRemainingAggregatorTest(final CreateHistogramFromValues histogramCreatorFromValues) {
+        singleHistGroup = Collections.singletonList(histogramCreatorFromValues.create(1L, Arrays.asList(1d, 10d, 100d, 1000d)));
         singleDoubleGroup = Collections.singletonList(new DoubleDataPoint(1L, 0d));
-        emptyHistGroup = Collections.singletonList(histogramCreator.create(1L, Collections.emptyList()));
+        emptyHistGroup = Collections.singletonList(histogramCreatorFromValues.create(1L, Collections.emptyList()));
         multiHistGroup = Arrays.asList(
-                histogramCreator.create(1L, Arrays.asList(10d, 20d, 30d, 40d)),
-                histogramCreator.create(2L, Arrays.asList(20d, 30d, 40d, 50d)),
-                histogramCreator.create(3L, Arrays.asList(30d, 40d, 50d, 60d)));
+                histogramCreatorFromValues.create(1L, Arrays.asList(10d, 20d, 30d, 40d)),
+                histogramCreatorFromValues.create(2L, Arrays.asList(20d, 30d, 40d, 50d)),
+                histogramCreatorFromValues.create(3L, Arrays.asList(30d, 40d, 50d, 60d)));
     }
 
     @Parameterized.Parameters
     public static Collection<Object[]> parameters() {
-        return createParametersForHistogramFromValues(Collections.emptyList());
+        return createParametersFromValues();
     }
 
     @Before

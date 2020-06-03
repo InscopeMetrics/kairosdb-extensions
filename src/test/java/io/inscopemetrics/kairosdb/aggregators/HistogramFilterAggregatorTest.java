@@ -29,7 +29,6 @@ import org.kairosdb.core.datastore.DataPointGroup;
 import org.kairosdb.testing.ListDataPointGroup;
 
 import java.util.Collection;
-import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -69,7 +68,7 @@ public final class HistogramFilterAggregatorTest extends AbstractHistogramTest {
 
     @Parameterized.Parameters
     public static Collection<Object[]> parameters() {
-        return createParametersForHistogramFromValues(Collections.emptyList());
+        return createParametersFromValues();
     }
 
     @Before

@@ -64,7 +64,7 @@ public final class HistogramMeanAggregator extends RangeAggregator {
     private final class HistogramMeanDataPointAggregator implements RangeSubAggregator {
         @Override
         public Iterable<DataPoint> getNextDataPoints(final long returnTime, final Iterator<DataPoint> dataPointRange) {
-            int count = 0;
+            long count = 0;
             double sum = 0;
             while (dataPointRange.hasNext()) {
                 final DataPoint dp = dataPointRange.next();

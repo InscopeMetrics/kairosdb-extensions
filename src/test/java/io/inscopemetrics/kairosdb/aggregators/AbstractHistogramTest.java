@@ -41,84 +41,79 @@ abstract class AbstractHistogramTest {
     private static final CreateHistogramFromCounts CREATE_HISTOGRAM_V1_FROM_COUNTS =
             HistogramUtils::createHistogramV1;
 
+    private static final List<List<Object>> ALL_PARAMETERS_BY_TYPE = Arrays.asList(
+            Arrays.asList(
+                    CREATE_HISTOGRAM_V1_FROM_VALUES,
+                    CREATE_HISTOGRAM_V1_FROM_COUNTS
+            ),
+            Arrays.asList(
+                    CREATE_HISTOGRAM_V2_FROM_VALUES,
+                    CREATE_HISTOGRAM_V2_FROM_COUNTS
+            ));
+
+    private static final List<List<Object>> FROM_VALUES_PARAMETERS_BY_TYPE = Arrays.asList(
+            Arrays.asList(
+                    CREATE_HISTOGRAM_V1_FROM_VALUES
+            ),
+            Arrays.asList(
+                    CREATE_HISTOGRAM_V2_FROM_VALUES
+            ));
+
+    private static final List<List<Object>> FROM_COUNTS_PARAMETERS_BY_TYPE = Arrays.asList(
+            Arrays.asList(
+                    CREATE_HISTOGRAM_V1_FROM_COUNTS
+            ),
+            Arrays.asList(
+                    CREATE_HISTOGRAM_V2_FROM_COUNTS
+            ));
+
     /**
-     * Create a parameterization per histogram from values factory of the
-     * supplied parameters.
+     * Create a parameterization per histogram type providing both from values
+     * and from counts factories.
      *
-     * @param parametersPerFactory The parameters to include with each factory.
      * @return The resulting parameterization by factory.
      */
-    public static Collection<Object[]> createParametersForHistogramFromValues(
-            final Collection<Object> parametersPerFactory) {
+    public static Collection<Object[]> createParameters() {
+        return createParameterization(ALL_PARAMETERS_BY_TYPE);
+    }
+
+    /**
+     * Create a parameterization per histogram type providing only from values
+     * factories.
+     *
+     * @return The resulting parameterization by factory.
+     */
+    public static Collection<Object[]> createParametersFromValues() {
+        return createParameterization(FROM_VALUES_PARAMETERS_BY_TYPE);
+    }
+
+    /**
+     * Create a parameterization per histogram type providing only from counts
+     * factories.
+     *
+     * @return The resulting parameterization by factory.
+     */
+    public static Collection<Object[]> createParametersFromCounts() {
+        return createParameterization(FROM_COUNTS_PARAMETERS_BY_TYPE);
+    }
+
+    private static Collection<Object[]> createParameterization(
+            final List<List<Object>> parameterListA
+    ) {
         final List<Object[]> parameterSets = new ArrayList<>();
-        for (final CreateHistogramFromValues factory : getHistogramFactoriesFromValues()) {
-            final Object[] parameters = new Object[parametersPerFactory.size() + 1];
+        for (final List<Object> factoryList : parameterListA) {
+            final Object[] parameters = new Object[factoryList.size()];
 
-            // The first parameter is the factory
-            parameters[0] = factory;
-
-            // The next parameters are the ones supplied
-            int i = 1;
-            for (final Object parameter : parametersPerFactory) {
-                parameters[i] = parameter;
-                ++i;
+            // The first n parameters are the factories
+            int i = 0;
+            for (; i < factoryList.size(); ++i) {
+                parameters[i] = factoryList.get(i);
             }
 
             // Add the parameter set
             parameterSets.add(parameters);
         }
         return parameterSets;
-    }
-
-    /**
-     * Create a parameterization per histogram from counts factory of the
-     * supplied parameters.
-     *
-     * @param parametersPerFactory The parameters to include with each factory.
-     * @return The resulting parameterization by factory.
-     */
-    public static Collection<Object[]> createParametersForHistogramFromCounts(
-            final Collection<Object> parametersPerFactory) {
-        final List<Object[]> parameterSets = new ArrayList<>();
-        for (final CreateHistogramFromCounts factory : getHistogramFactoriesFromCounts()) {
-            final Object[] parameters = new Object[parametersPerFactory.size() + 1];
-
-            // The first parameter is the factory
-            parameters[0] = factory;
-
-            // The next parameters are the ones supplied
-            int i = 1;
-            for (final Object parameter : parametersPerFactory) {
-                parameters[i] = parameter;
-                ++i;
-            }
-
-            // Add the parameter set
-            parameterSets.add(parameters);
-        }
-        return parameterSets;
-    }
-
-    /**
-     * Return the available histogram from values factories.
-     *
-     * @return {@link Iterable} of histogram factories.
-     */
-    public static Iterable<CreateHistogramFromValues> getHistogramFactoriesFromValues() {
-        return Arrays.asList(
-                CREATE_HISTOGRAM_V1_FROM_VALUES,
-                CREATE_HISTOGRAM_V2_FROM_VALUES);
-    }
-
-    /**
-     * Return the available histogram from counts factories.
-     *
-     * @return {@link Iterable} of histogram factories.
-     */
-    public static Iterable<CreateHistogramFromCounts> getHistogramFactoriesFromCounts() {
-        return Arrays.asList(
-                CREATE_HISTOGRAM_V1_FROM_COUNTS,
-                CREATE_HISTOGRAM_V2_FROM_COUNTS);
     }
 
     protected interface CreateHistogramFromValues {

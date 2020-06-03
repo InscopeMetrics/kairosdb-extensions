@@ -16,6 +16,7 @@
 
 package io.inscopemetrics.kairosdb.aggregators;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -26,7 +27,6 @@ import org.kairosdb.testing.ListDataPointGroup;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -41,19 +41,23 @@ import static org.junit.Assert.assertTrue;
 public final class HistogramMeanAggregatorTest extends AbstractHistogramTest {
 
     private final CreateHistogramFromValues histogramCreatorFromValues;
+    private final CreateHistogramFromCounts histogramCreatorFromCounts;
 
-    public HistogramMeanAggregatorTest(final CreateHistogramFromValues histogramCreatorFromValues) {
+    public HistogramMeanAggregatorTest(
+            final CreateHistogramFromValues histogramCreatorFromValues,
+            final CreateHistogramFromCounts histogramCreatorFromCounts) {
         this.histogramCreatorFromValues = histogramCreatorFromValues;
+        this.histogramCreatorFromCounts = histogramCreatorFromCounts;
     }
 
     @Parameterized.Parameters
     public static Collection<Object[]> parameters() {
-        return createParametersForHistogramFromValues(Collections.emptyList());
+        return createParameters();
     }
 
     @Test
     public void testAggregator() {
-        final ListDataPointGroup group = new ListDataPointGroup("HistogramMeanAggregator");
+        final ListDataPointGroup group = new ListDataPointGroup("HistogramMeanAggregator.testAggregator");
         group.addDataPoint(histogramCreatorFromValues.create(1L, Arrays.asList(1.0, 1.0)));
         group.addDataPoint(histogramCreatorFromValues.create(1L, Arrays.asList(2.0, 3.0)));
         group.addDataPoint(histogramCreatorFromValues.create(2L, Arrays.asList(1.0, 5.0)));
@@ -70,6 +74,26 @@ public final class HistogramMeanAggregatorTest extends AbstractHistogramTest {
         assertTrue(result.hasNext());
         resultDataPoint = (DoubleDataPoint) result.next();
         assertEquals(3.0, resultDataPoint.getDoubleValue(), 0.0001);
+
+        assertFalse(result.hasNext());
+    }
+
+    @Test
+    public void testOverflow() {
+        final ListDataPointGroup group = new ListDataPointGroup("HistogramMeanAggregator.testOverflow");
+        for (int i = 0; i < 2200; ++i) {
+            group.addDataPoint(histogramCreatorFromCounts.create(
+                    1L,
+                    ImmutableMap.of(1.0d, 1000000L)));
+        }
+
+        final HistogramMeanAggregator aggregator = new HistogramMeanAggregator(new DoubleDataPointFactoryImpl());
+
+        final DataPointGroup result = aggregator.aggregate(group);
+        DoubleDataPoint resultDataPoint;
+        assertTrue(result.hasNext());
+        resultDataPoint = (DoubleDataPoint) result.next();
+        assertEquals(1.0, resultDataPoint.getDoubleValue(), 0.0001);
 
         assertFalse(result.hasNext());
     }

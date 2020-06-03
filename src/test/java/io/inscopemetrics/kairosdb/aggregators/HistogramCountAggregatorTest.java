@@ -28,7 +28,6 @@ import org.kairosdb.core.exception.KairosDBException;
 import org.kairosdb.testing.ListDataPointGroup;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.TreeMap;
 
 import static org.junit.Assert.assertEquals;
@@ -50,7 +49,7 @@ public final class HistogramCountAggregatorTest extends AbstractHistogramTest {
 
     @Parameterized.Parameters
     public static Collection<Object[]> parameters() {
-        return createParametersForHistogramFromCounts(Collections.emptyList());
+        return createParametersFromCounts();
     }
 
     @Test
