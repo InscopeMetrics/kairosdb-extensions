@@ -17,12 +17,10 @@ package io.inscopemetrics.kairosdb.aggregators;
 
 import com.google.inject.Inject;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
-import io.inscopemetrics.kairosdb.HistogramDataPointFactory;
 import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.aggregator.RangeAggregator;
 import org.kairosdb.core.annotation.FeatureComponent;
 import org.kairosdb.core.datapoints.DoubleDataPointFactory;
-import org.kairosdb.core.exception.KairosDBException;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -30,7 +28,7 @@ import java.util.Iterator;
 /**
  * Aggregator that computes the mean value of histograms.
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 @FeatureComponent(
         name = "havg",
@@ -42,10 +40,9 @@ public final class HistogramMeanAggregator extends RangeAggregator {
      * Public constructor.
      *
      * @param dataPointFactory A factory for creating DoubleDataPoints
-     * @throws KairosDBException on error
      */
     @Inject
-    public HistogramMeanAggregator(final DoubleDataPointFactory dataPointFactory) throws KairosDBException {
+    public HistogramMeanAggregator(final DoubleDataPointFactory dataPointFactory) {
         this.dataPointFactory = dataPointFactory;
     }
 
@@ -56,7 +53,7 @@ public final class HistogramMeanAggregator extends RangeAggregator {
 
     @Override
     public boolean canAggregate(final String groupType) {
-        return HistogramDataPointFactory.GROUP_TYPE.equals(groupType);
+        return HistogramDataPoint.GROUP_TYPE.equals(groupType);
     }
 
     @Override

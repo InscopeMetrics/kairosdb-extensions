@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Dropbox Inc.
+ * Copyright 2019 InscopeMetrics Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,19 +22,20 @@ import java.util.TreeMap;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Test class for {@link HistogramDataPointImpl}.
+ * Tests for the {@link HistogramDataPointV2Impl} class.
  *
- * @author William Ehlhardt (whale at dropbox dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
-public class HistogramDatapointImplTest {
+public class HistogramDataPointV2ImplTest {
+
     @Test
     public void testLargeSampleCount() {
-        final TreeMap<Double, Integer> map = new TreeMap<>();
-        map.put(1d, 2147483647);
-        map.put(2d, 2147483647);
-        map.put(3d, 2147483647);
-        map.put(4d, 2147483647);
-        final HistogramDataPointImpl dp = new HistogramDataPointImpl(1, map, -10, 10, 10, 10);
+        final TreeMap<Double, Long> map = new TreeMap<>();
+        map.put(1d, 2147483647L);
+        map.put(2d, 2147483647L);
+        map.put(3d, 2147483647L);
+        map.put(4d, 2147483647L);
+        final HistogramDataPointV2Impl dp = new HistogramDataPointV2Impl(1, 7, map, -10, 10, 10, 10);
         assertEquals(8589934588L, dp.getSampleCount());
     }
 }

@@ -22,12 +22,13 @@ import org.json.JSONObject;
 
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.TreeMap;
 
 /**
  * Helper class to hold the histogram information for testing.
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 @SuppressFBWarnings("FE_FLOATING_POINT_EQUALITY")
 public class Histogram {
@@ -36,6 +37,7 @@ public class Histogram {
     private double max;
     private double sum;
     private long count;
+    private Optional<Byte> precision;
 
     /**
      * Public constructor.
@@ -47,7 +49,29 @@ public class Histogram {
         max = -Double.MAX_VALUE;
         sum = 0;
         count = 0;
-        for (Double number : numbers) {
+        precision = Optional.empty();
+        for (final double number : numbers) {
+            sum += number;
+            min = Math.min(min, number);
+            max = Math.max(max, number);
+            bins.compute(Math.floor(number), (i, j) -> j == null ? 1 : j + 1);
+            count++;
+        }
+    }
+
+    /**
+     * Public constructor.
+     *
+     * @param numbers The raw numbers.
+     * @param precision The precision of the histogram representation.
+     */
+    public Histogram(final Iterable<Double> numbers, final byte precision) {
+        min = Double.MAX_VALUE;
+        max = -Double.MAX_VALUE;
+        sum = 0;
+        count = 0;
+        this.precision = Optional.of(precision);
+        for (final double number : numbers) {
             sum += number;
             min = Math.min(min, number);
             max = Math.max(max, number);
@@ -67,6 +91,11 @@ public class Histogram {
         min = json.getDouble("min");
         max = json.getDouble("max");
         sum = json.getDouble("sum");
+        if (json.has("precision")) {
+            precision = Optional.of((byte) json.getInt("precision"));
+        } else {
+            precision = Optional.empty();
+        }
         final JSONObject binsJson = json.getJSONObject("bins");
         for (final Iterator<String> it = (Iterator<String>) binsJson.keys(); it.hasNext();) {
             final String key = it.next();
@@ -85,11 +114,12 @@ public class Histogram {
             return false;
         } else if (obj.getClass().equals(getClass())) {
             final Histogram other = (Histogram) obj;
-            return other.bins.equals(bins)
+            return Objects.equals(other.bins, bins)
                     && other.count == count
                     && other.max == max
                     && other.min == min
-                    && other.sum == sum;
+                    && other.sum == sum
+                    && Objects.equals(other.precision, precision);
         } else {
             return false;
         }
@@ -97,7 +127,7 @@ public class Histogram {
 
     @Override
     public int hashCode() {
-        return Objects.hash(bins, count, min, max, sum);
+        return Objects.hash(bins, count, min, max, sum, precision);
     }
 
     @Override
@@ -107,6 +137,7 @@ public class Histogram {
                 .add("max", max)
                 .add("sum", sum)
                 .add("count", count)
+                .add("precision", precision)
                 .add("bins", bins)
                 .toString();
     }
@@ -123,7 +154,8 @@ public class Histogram {
                 .put("mean", sum / count)
                 .put("min", min)
                 .put("max", max)
-                .put("sum", sum);
+                .put("sum", sum)
+                .put("precision", precision.orElse(null));
         return histogram;
     }
 
@@ -145,6 +177,10 @@ public class Histogram {
 
     public long getCount() {
         return count;
+    }
+
+    public Optional<Byte> getPrecision() {
+        return precision;
     }
 
     public TreeMap<Double, Long> getBins() {

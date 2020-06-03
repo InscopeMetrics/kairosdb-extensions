@@ -17,12 +17,10 @@ package io.inscopemetrics.kairosdb.aggregators;
 
 import com.google.inject.Inject;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
-import io.inscopemetrics.kairosdb.HistogramDataPointFactory;
 import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.aggregator.RangeAggregator;
 import org.kairosdb.core.annotation.FeatureComponent;
 import org.kairosdb.core.datapoints.DoubleDataPointFactory;
-import org.kairosdb.core.exception.KairosDBException;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -30,7 +28,7 @@ import java.util.Iterator;
 /**
  * Aggregator that computes the mean value of histograms.
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 @FeatureComponent(
         name = "hmax",
@@ -42,21 +40,20 @@ public final class HistogramMaxAggregator extends RangeAggregator {
      * Public constructor.
      *
      * @param dataPointFactory A factory for creating DoubleDataPoints
-     * @throws KairosDBException on error
      */
     @Inject
-    public HistogramMaxAggregator(final DoubleDataPointFactory dataPointFactory) throws KairosDBException {
+    public HistogramMaxAggregator(final DoubleDataPointFactory dataPointFactory) {
         this.dataPointFactory = dataPointFactory;
     }
 
     @Override
     protected RangeSubAggregator getSubAggregator() {
-        return new HistogramMeanDataPointAggregator();
+        return new HistogramMaxDataPointAggregator();
     }
 
     @Override
     public boolean canAggregate(final String groupType) {
-        return HistogramDataPointFactory.GROUP_TYPE.equals(groupType);
+        return HistogramDataPoint.GROUP_TYPE.equals(groupType);
     }
 
     @Override
@@ -64,7 +61,7 @@ public final class HistogramMaxAggregator extends RangeAggregator {
         return dataPointFactory.getGroupType();
     }
 
-    private final class HistogramMeanDataPointAggregator implements RangeSubAggregator {
+    private final class HistogramMaxDataPointAggregator implements RangeSubAggregator {
 
         @Override
         public Iterable<DataPoint> getNextDataPoints(final long returnTime, final Iterator<DataPoint> dataPointRange) {

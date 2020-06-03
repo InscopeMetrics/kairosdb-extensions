@@ -18,14 +18,12 @@ package io.inscopemetrics.kairosdb.aggregators;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
-import io.inscopemetrics.kairosdb.HistogramDataPointFactory;
 import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.aggregator.RangeAggregator;
 import org.kairosdb.core.annotation.FeatureComponent;
 import org.kairosdb.core.annotation.FeatureProperty;
 import org.kairosdb.core.annotation.ValidationProperty;
 import org.kairosdb.core.datapoints.DoubleDataPointFactory;
-import org.kairosdb.core.exception.KairosDBException;
 import org.kairosdb.core.http.rest.validation.NonZero;
 
 import java.util.Collections;
@@ -36,7 +34,7 @@ import java.util.TreeMap;
 /**
  * Aggregator that computes a percentile of histograms.
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 @FeatureComponent(
         name = "hpercentile",
@@ -65,10 +63,9 @@ public final class HistogramPercentileAggregator extends RangeAggregator {
      * Public constructor.
      *
      * @param dataPointFactory A factory for creating DoubleDataPoints
-     * @throws KairosDBException on error
      */
     @Inject
-    public HistogramPercentileAggregator(final DoubleDataPointFactory dataPointFactory) throws KairosDBException {
+    public HistogramPercentileAggregator(final DoubleDataPointFactory dataPointFactory) {
         this.dataPointFactory = dataPointFactory;
     }
 
@@ -78,12 +75,12 @@ public final class HistogramPercentileAggregator extends RangeAggregator {
 
     @Override
     protected RangeSubAggregator getSubAggregator() {
-        return new HistogramMeanDataPointAggregator();
+        return new HistogramPercentileDataPointAggregator();
     }
 
     @Override
     public boolean canAggregate(final String groupType) {
-        return HistogramDataPointFactory.GROUP_TYPE.equals(groupType);
+        return HistogramDataPoint.GROUP_TYPE.equals(groupType);
     }
 
     @Override
@@ -91,17 +88,17 @@ public final class HistogramPercentileAggregator extends RangeAggregator {
         return dataPointFactory.getGroupType();
     }
 
-    private final class HistogramMeanDataPointAggregator implements RangeSubAggregator {
+    private final class HistogramPercentileDataPointAggregator implements RangeSubAggregator {
 
         @Override
         public Iterable<DataPoint> getNextDataPoints(final long returnTime, final Iterator<DataPoint> dataPointRange) {
-            final TreeMap<Double, Integer> merged = Maps.newTreeMap();
+            final TreeMap<Double, Long> merged = Maps.newTreeMap();
             long count = 0;
             while (dataPointRange.hasNext()) {
                 final DataPoint dp = dataPointRange.next();
                 if (dp instanceof HistogramDataPoint) {
                     final HistogramDataPoint hist = (HistogramDataPoint) dp;
-                    for (final Map.Entry<Double, Integer> entry : hist.getMap().entrySet()) {
+                    for (final Map.Entry<Double, Long> entry : hist.getMap().entrySet()) {
                         count += entry.getValue();
                         merged.compute(entry.getKey(), (key, existing) ->  entry.getValue() + (existing == null ? 0 : existing));
                     }
@@ -110,9 +107,9 @@ public final class HistogramPercentileAggregator extends RangeAggregator {
 
             final long target = (long) Math.ceil(percentile * count);
             long current = 0;
-            final Iterator<Map.Entry<Double, Integer>> entryIterator = merged.entrySet().iterator();
+            final Iterator<Map.Entry<Double, Long>> entryIterator = merged.entrySet().iterator();
             while (entryIterator.hasNext()) {
-                final Map.Entry<Double, Integer> entry = entryIterator.next();
+                final Map.Entry<Double, Long> entry = entryIterator.next();
                 current += entry.getValue();
                 if (current >= target) {
                     return Collections.singletonList(dataPointFactory.createDataPoint(returnTime, entry.getKey()));

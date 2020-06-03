@@ -28,7 +28,7 @@ import java.io.UnsupportedEncodingException;
 /**
  * Utility functions for building KairosDB queries and objects.
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public final class KairosHelper {
     private static final long TIME_TO_LIVE_IN_SECONDS = 600;

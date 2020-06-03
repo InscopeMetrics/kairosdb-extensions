@@ -24,7 +24,7 @@ import javax.inject.Provider;
 /**
  * Provides mapping of data types and data groups to the aggregators that can aggregate them.
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public class DelegatingAggregatorMap extends GenericAggregatorMap<Aggregator> {
 

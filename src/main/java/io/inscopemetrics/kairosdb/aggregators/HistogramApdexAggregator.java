@@ -17,7 +17,6 @@ package io.inscopemetrics.kairosdb.aggregators;
 
 import com.google.inject.Inject;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
-import io.inscopemetrics.kairosdb.HistogramDataPointFactory;
 import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.aggregator.RangeAggregator;
 import org.kairosdb.core.annotation.FeatureComponent;
@@ -35,7 +34,7 @@ import javax.validation.constraints.NotNull;
  * Aggregator that computes the apdex from a range of histograms.
  * See https://en.wikipedia.org/wiki/Apdex for more details about Apdex
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 @FeatureComponent(
         name = "apdex",
@@ -75,7 +74,7 @@ public class HistogramApdexAggregator extends RangeAggregator{
 
     @Override
     public boolean canAggregate(final String groupType) {
-        return HistogramDataPointFactory.GROUP_TYPE.equals(groupType);
+        return HistogramDataPoint.GROUP_TYPE.equals(groupType);
     }
 
     @Override
@@ -90,12 +89,12 @@ public class HistogramApdexAggregator extends RangeAggregator{
             long satisfied = 0;
             long acceptable = 0;
             long total = 0;
-            final double acceptableThreshold = target * 4;
+            final double acceptableThreshold = target * 4d;
             while (dataPointRange.hasNext()) {
                 final DataPoint dp = dataPointRange.next();
                 if (dp instanceof HistogramDataPoint) {
                     final HistogramDataPoint hist = (HistogramDataPoint) dp;
-                    for (final Map.Entry<Double, Integer> entry : hist.getMap().entrySet()) {
+                    for (final Map.Entry<Double, Long> entry : hist.getMap().entrySet()) {
                         if (entry.getKey() <= target) {
                             satisfied += entry.getValue();
                         } else if (entry.getKey() <= acceptableThreshold) {

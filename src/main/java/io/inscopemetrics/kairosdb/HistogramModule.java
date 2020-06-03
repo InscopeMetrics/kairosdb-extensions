@@ -59,7 +59,11 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Provider;
 
 /**
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * Guice injection module binds instances for plugin.
+ *
+ * TODO(ville): Rename this module.  This is a breaking change.
+ *
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 @SuppressWarnings("unchecked")
 public class HistogramModule extends AbstractModule {
@@ -68,6 +72,7 @@ public class HistogramModule extends AbstractModule {
     @Override
     protected void configure() {
         LOGGER.info("Binding HistogramModule");
+        bind(HistogramDataPointV2Factory.class).in(Scopes.SINGLETON);
         bind(HistogramDataPointFactory.class).in(Scopes.SINGLETON);
 
         bind(DelegatingAvgAggregator.class);

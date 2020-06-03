@@ -18,8 +18,8 @@ package io.inscopemetrics.kairosdb.aggregators;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
-import io.inscopemetrics.kairosdb.HistogramDataPointFactory;
-import io.inscopemetrics.kairosdb.HistogramDataPointImpl;
+import io.inscopemetrics.kairosdb.HistogramDataPointV2Impl;
+import io.inscopemetrics.kairosdb.HistogramKeyUtility;
 import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.aggregator.AggregatedDataPointGroupWrapper;
 import org.kairosdb.core.aggregator.FilterAggregator;
@@ -30,6 +30,7 @@ import org.kairosdb.plugin.Aggregator;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.TreeMap;
 
 /**
@@ -124,45 +125,21 @@ public class HistogramFilterAggregator implements Aggregator {
 
     @Override
     public boolean canAggregate(final String groupType) {
-        return HistogramDataPointFactory.GROUP_TYPE.equals(groupType);
+        return HistogramDataPoint.GROUP_TYPE.equals(groupType);
     }
 
     @Override
     public String getAggregatedGroupType(final String groupType) {
-        return HistogramDataPointFactory.GROUP_TYPE;
-    }
-
-    static double truncate(final double val) {
-        final long mask = 0xffffe00000000000L;
-        return Double.longBitsToDouble(Double.doubleToRawLongBits(val) & mask);
-    }
-
-    /**
-     * Gives an inclusive bound of the bin that the passed in value will be placed in.
-     * If the value is positive, it will be an inclusive upper bound, and if it is negative,
-     * it will be an inclusive lower bound.
-     *
-     * @param val the value whose bucket bound will be calculated
-     * @return the inclusive upper or lower bound of the bin
-     */
-    static double binInclusiveBound(final double val) {
-        long bound = Double.doubleToLongBits(val);
-        // TODO(ville): Extract the magic numbers and if necessary add documentation.
-        // CHECKSTYLE.OFF: MagicNumber -
-        bound >>= 45;
-        bound += 1;
-        bound <<= 45;
-        bound -= 1;
-        // CHECKSTYLE.OFF: MagicNumber
-
-        return Double.longBitsToDouble(bound);
+        return HistogramDataPoint.GROUP_TYPE;
     }
 
     private static boolean isNegative(final double value) {
+        // TODO(ville): Add documentation to why this is implemented this way.
         return Double.doubleToLongBits(value) < 0;
     }
 
     private class HistogramFilterDataPointAggregator extends AggregatedDataPointGroupWrapper {
+
         HistogramFilterDataPointAggregator(final DataPointGroup innerDataPointGroup) {
             super(innerDataPointGroup);
         }
@@ -171,9 +148,9 @@ public class HistogramFilterAggregator implements Aggregator {
             boolean foundValidDp = false;
 
             while (!foundValidDp && currentDataPoint != null) {
-                final HistogramDataPoint hdp = filterBins(currentDataPoint);
-                if (hdp.getSampleCount() > 0) {
-                    currentDataPoint = hdp;
+                final Optional<HistogramDataPoint> hdp = filterBins(currentDataPoint);
+                if (hdp.isPresent()) {
+                    currentDataPoint = hdp.get();
                     foundValidDp = true;
                 } else {
                     moveCurrentDataPoint();
@@ -200,47 +177,66 @@ public class HistogramFilterAggregator implements Aggregator {
             }
         }
 
-        private HistogramDataPoint filterBins(final DataPoint dp) {
+        private Optional<HistogramDataPoint> filterBins(final DataPoint dp) {
+            if (!(dp instanceof HistogramDataPoint)) {
+                return Optional.empty();
+            }
+
             final long timeStamp = dp.getTimestamp();
-            final TreeMap<Double, Integer> filtered = Maps.newTreeMap();
+            final TreeMap<Double, Long> filtered = Maps.newTreeMap();
             double min = Double.MAX_VALUE;
             double max = -Double.MAX_VALUE;
             double sum = 0;
             long count = 0;
-            long originalCount = 0;
 
-            if (dp instanceof HistogramDataPoint) {
-                final HistogramDataPoint hist = (HistogramDataPoint) dp;
-                originalCount = hist.getOriginalCount();
+            final HistogramDataPoint hist = (HistogramDataPoint) dp;
+            final HistogramKeyUtility histogramKeyUtility = HistogramKeyUtility.getInstance(hist.getPrecision());
+            final long originalCount = hist.getOriginalCount();
 
-                if (histNotChangedByThreshold(hist)) {
-                    return hist;
-                } else {
-                    for (final Map.Entry<Double, Integer> entry : hist.getMap().entrySet()) {
-                        if (!shouldDiscard(entry.getKey())) {
-                            filtered.put(entry.getKey(), entry.getValue());
-                            min = Math.min(min, Math.min(entry.getKey(), binInclusiveBound(entry.getKey())));
-                            max = Math.max(max, Math.max(entry.getKey(), binInclusiveBound(entry.getKey())));
-                            sum += entry.getKey() * entry.getValue();
-                            count += entry.getValue();
-                        }
-                    }
-                    if (minNotChangedByThreshold(hist)) {
-                        min = hist.getMin();
-                    }
-                    if (maxNotChangedByThreshold(hist)) {
-                        max = hist.getMax();
-                    }
+            if (histNotChangedByThreshold(hist)) {
+                return Optional.of(hist);
+            }
+
+            for (final Map.Entry<Double, Long> entry : hist.getMap().entrySet()) {
+                if (!shouldDiscard(entry.getKey(), histogramKeyUtility)) {
+                    filtered.put(entry.getKey(), entry.getValue());
+                    min = Math.min(
+                            min,
+                            Math.min(
+                                    entry.getKey(),
+                                    histogramKeyUtility.binInclusiveBound(entry.getKey())));
+                    max = Math.max(
+                            max,
+                            Math.max(
+                                    entry.getKey(),
+                                    histogramKeyUtility.binInclusiveBound(entry.getKey())));
+                    sum += entry.getKey() * entry.getValue();
+                    count += entry.getValue();
                 }
             }
-            return new HistogramDataPointImpl(
-                    timeStamp,
-                    filtered,
-                    min,
-                    max,
-                    sum / count,
-                    sum,
-                    originalCount);
+
+            if (filtered.isEmpty()) {
+                return Optional.empty();
+            }
+
+            // TODO(ville): If we know we're not going to change it then don't compute it above.
+            if (minNotChangedByThreshold(hist.getMin(), histogramKeyUtility)) {
+                min = hist.getMin();
+            }
+            if (maxNotChangedByThreshold(hist.getMax(), histogramKeyUtility)) {
+                max = hist.getMax();
+            }
+
+            return Optional.of(
+                    new HistogramDataPointV2Impl(
+                            timeStamp,
+                            hist.getPrecision(),
+                            filtered,
+                            min,
+                            max,
+                            sum / count,
+                            sum,
+                            originalCount));
         }
 
         private boolean histNotChangedByThreshold(final HistogramDataPoint hist) {
@@ -261,41 +257,41 @@ public class HistogramFilterAggregator implements Aggregator {
             }
         }
 
-        private boolean minNotChangedByThreshold(final HistogramDataPoint hist) {
+        private boolean minNotChangedByThreshold(final double min, final HistogramKeyUtility histogramKeyUtility) {
             switch (filterOp) {
                 case LT:
-                    return threshold <= hist.getMin();
+                    return threshold <= min;
                 case LTE:
-                    return threshold < hist.getMin();
+                    return threshold < min;
                 case EQUAL:
-                    return !shouldDiscard(hist.getMin());
+                    return !shouldDiscard(min, histogramKeyUtility);
                 default:
                     return true;
             }
         }
 
-        private boolean maxNotChangedByThreshold(final HistogramDataPoint hist) {
+        private boolean maxNotChangedByThreshold(final double max, final HistogramKeyUtility histogramKeyUtility) {
             switch (filterOp) {
                 case GT:
-                    return threshold >= hist.getMax();
+                    return threshold >= max;
                 case GTE:
-                    return threshold > hist.getMax();
+                    return threshold > max;
                 case EQUAL:
-                    return !shouldDiscard(hist.getMax());
+                    return !shouldDiscard(max, histogramKeyUtility);
                 default:
                     return true;
             }
         }
 
-        private boolean shouldDiscard(final double value) {
+        private boolean shouldDiscard(final double value, final HistogramKeyUtility histogramKeyUtility) {
             final double lowerBound;
             final double upperBound;
             if (isNegative(value)) {
-                upperBound = truncate(value);
-                lowerBound = binInclusiveBound(value);
+                upperBound = histogramKeyUtility.truncateToDouble(value);
+                lowerBound = histogramKeyUtility.binInclusiveBound(value);
             } else {
-                lowerBound = truncate(value);
-                upperBound = binInclusiveBound(value);
+                lowerBound = histogramKeyUtility.truncateToDouble(value);
+                upperBound = histogramKeyUtility.binInclusiveBound(value);
             }
 
             //=================================================================

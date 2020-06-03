@@ -1,9 +1,18 @@
 KairosDb Extensions Release Notes
 =================================
 
-2.2.0 - TBD
+2.2.0 - June 5, 2020
 ------------------------
-* _TBD_
+* Added version 2 Protobuf based storage from [kairosdb-format](https://github.com/InscopeMetrics/kairosdb-format).
+* Histogram bucket counts represented as 64-bit values.
+
+**NOTE**: To use the Protobuf based format you must update your configuration to:
+```
+kairosdb.service.histograms=io.inscopemetrics.kairosdb.HistogramModule
+kairosdb.datapoints.factory.histogram=io.inscopemetrics.kairosdb.HistogramDataPointV2Factory
+```
+
+This is already set in the published [Docker image](https://hub.docker.com/r/inscopemetrics/kairosdb-extensions) as of version `2.2.0`.
 
 2.1.10 - February 26, 2020
 ------------------------

@@ -18,12 +18,11 @@ package io.inscopemetrics.kairosdb.aggregators;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
-import io.inscopemetrics.kairosdb.HistogramDataPointFactory;
-import io.inscopemetrics.kairosdb.HistogramDataPointImpl;
+import io.inscopemetrics.kairosdb.HistogramDataPointV2Impl;
+import io.inscopemetrics.kairosdb.HistogramKeyUtility;
 import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.aggregator.RangeAggregator;
 import org.kairosdb.core.annotation.FeatureComponent;
-import org.kairosdb.core.exception.KairosDBException;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -33,52 +32,85 @@ import java.util.TreeMap;
 /**
  * Aggregator that computes a percentile of histograms.
  *
- * @author Brandon Arp (brandon dot arp at smartsheet dot com)
+ * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 @FeatureComponent(
         name = "merge",
         description = "Merges histograms.")
 public final class HistogramMergeAggregator extends RangeAggregator {
 
+    private static final int MAX_PRECISION = 64;
+
     /**
      * Public constructor.
-     *
-     * @throws KairosDBException on error
      */
     @Inject
-    public HistogramMergeAggregator() throws KairosDBException { }
+    public HistogramMergeAggregator() { }
 
     @Override
     protected RangeSubAggregator getSubAggregator() {
-        return new HistogramMeanDataPointAggregator();
+        return new HistogramMergeDataPointAggregator();
     }
 
     @Override
     public boolean canAggregate(final String groupType) {
-        return HistogramDataPointFactory.GROUP_TYPE.equals(groupType);
+        return HistogramDataPoint.GROUP_TYPE.equals(groupType);
     }
 
     @Override
     public String getAggregatedGroupType(final String groupType) {
-        return HistogramDataPointFactory.GROUP_TYPE;
+        return HistogramDataPoint.GROUP_TYPE;
     }
 
-    private static final class HistogramMeanDataPointAggregator implements RangeSubAggregator {
+    private static final class HistogramMergeDataPointAggregator implements RangeSubAggregator {
         @Override
         public Iterable<DataPoint> getNextDataPoints(final long returnTime, final Iterator<DataPoint> dataPointRange) {
-            final TreeMap<Double, Integer> merged = Maps.newTreeMap();
+            TreeMap<Double, Long> merged = Maps.newTreeMap();
+            int precision = MAX_PRECISION;
+            HistogramKeyUtility keyUtility = HistogramKeyUtility.getInstance(precision);
             double min = Double.MAX_VALUE;
             double max = -Double.MAX_VALUE;
             double sum = 0;
             long count = 0;
-            int originalCount = 0;
+            long originalCount = 0;
 
             while (dataPointRange.hasNext()) {
                 final DataPoint dp = dataPointRange.next();
                 if (dp instanceof HistogramDataPoint) {
                     final HistogramDataPoint hist = (HistogramDataPoint) dp;
-                    for (final Map.Entry<Double, Integer> entry : hist.getMap().entrySet()) {
-                        merged.compute(entry.getKey(), (key, existing) ->  entry.getValue() + (existing == null ? 0 : existing));
+
+                    // If precision is less than our current precision, we need
+                    // to down sample the values in the map to the lower
+                    // precision.
+                    if (hist.getPrecision() < precision) {
+                        precision = hist.getPrecision();
+                        final HistogramKeyUtility newKeyUtility = HistogramKeyUtility.getInstance(precision);
+                        keyUtility = newKeyUtility;
+
+                        final TreeMap<Double, Long> downsampled = Maps.newTreeMap();
+                        for (final Map.Entry<Double, Long> entry : merged.entrySet()) {
+                            final Double mergedKey = entry.getKey();
+                            final Long mergedValue = entry.getValue();
+
+                            // Since precision is decreasing multiple keys from
+                            // merged may update the same bucket in downsampled
+                            downsampled.merge(
+                                newKeyUtility.truncateToDouble(mergedKey),
+                                mergedValue,
+                                Long::sum);
+                        }
+                        merged = downsampled;
+
+                    }
+
+                    for (final Map.Entry<Double, Long> entry : hist.getMap().entrySet()) {
+                        // All we know is that precision is not going down but
+                        // the precision of hist may be larger than merged
+                        // so we need to truncate all the hist keys
+                        merged.merge(
+                                keyUtility.truncateToDouble(entry.getKey()),
+                                entry.getValue(),
+                                Long::sum);
                         count += entry.getValue();
                     }
 
@@ -93,8 +125,9 @@ public final class HistogramMergeAggregator extends RangeAggregator {
             final double mean = sum / count;
 
             return Collections.singletonList(
-                    new HistogramDataPointImpl(
+                    new HistogramDataPointV2Impl(
                             returnTime,
+                            precision,
                             merged,
                             min,
                             max,
