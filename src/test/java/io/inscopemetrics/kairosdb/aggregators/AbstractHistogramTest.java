@@ -105,8 +105,7 @@ abstract class AbstractHistogramTest {
             final Object[] parameters = new Object[factoryList.size()];
 
             // The first n parameters are the factories
-            int i = 0;
-            for (; i < factoryList.size(); ++i) {
+            for (int i = 0; i < factoryList.size(); ++i) {
                 parameters[i] = factoryList.get(i);
             }
 

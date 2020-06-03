@@ -90,9 +90,8 @@ public final class HistogramMeanAggregatorTest extends AbstractHistogramTest {
         final HistogramMeanAggregator aggregator = new HistogramMeanAggregator(new DoubleDataPointFactoryImpl());
 
         final DataPointGroup result = aggregator.aggregate(group);
-        DoubleDataPoint resultDataPoint;
         assertTrue(result.hasNext());
-        resultDataPoint = (DoubleDataPoint) result.next();
+        final DoubleDataPoint resultDataPoint = (DoubleDataPoint) result.next();
         assertEquals(1.0, resultDataPoint.getDoubleValue(), 0.0001);
 
         assertFalse(result.hasNext());
