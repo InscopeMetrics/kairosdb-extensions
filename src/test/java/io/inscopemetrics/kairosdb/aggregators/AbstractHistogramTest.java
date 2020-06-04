@@ -74,6 +74,7 @@ abstract class AbstractHistogramTest {
      * @return The resulting parameterization by factory.
      */
     public static Collection<Object[]> createParameters() {
+        // TODO(ville): Support the caller providing own parameterization.
         return createParameterization(ALL_PARAMETERS_BY_TYPE);
     }
 
@@ -84,6 +85,7 @@ abstract class AbstractHistogramTest {
      * @return The resulting parameterization by factory.
      */
     public static Collection<Object[]> createParametersFromValues() {
+        // TODO(ville): Support the caller providing own parameterization.
         return createParameterization(FROM_VALUES_PARAMETERS_BY_TYPE);
     }
 
@@ -94,12 +96,15 @@ abstract class AbstractHistogramTest {
      * @return The resulting parameterization by factory.
      */
     public static Collection<Object[]> createParametersFromCounts() {
+        // TODO(ville): Support the caller providing own parameterization.
         return createParameterization(FROM_COUNTS_PARAMETERS_BY_TYPE);
     }
 
     private static Collection<Object[]> createParameterization(
             final List<List<Object>> parameterListA
     ) {
+        // TODO(ville): Support the caller providing BaseTcpSource.javaown parameterization.
+        // NOTE: Then multiply the two paramaterizations together.
         final List<Object[]> parameterSets = new ArrayList<>();
         for (final List<Object> factoryList : parameterListA) {
             final Object[] parameters = new Object[factoryList.size()];

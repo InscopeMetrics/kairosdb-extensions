@@ -79,8 +79,8 @@ public final class HistogramMeanAggregatorTest extends AbstractHistogramTest {
     }
 
     @Test
-    public void testOverflow() {
-        final ListDataPointGroup group = new ListDataPointGroup("HistogramMeanAggregator.testOverflow");
+    public void testCountDoesNotOverflow() {
+        final ListDataPointGroup group = new ListDataPointGroup("HistogramMeanAggregator.testCountDoesNotOverflow");
         for (int i = 0; i < 2200; ++i) {
             group.addDataPoint(histogramCreatorFromCounts.create(
                     1L,
