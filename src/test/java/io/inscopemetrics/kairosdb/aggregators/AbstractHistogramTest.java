@@ -103,7 +103,7 @@ abstract class AbstractHistogramTest {
     private static Collection<Object[]> createParameterization(
             final List<List<Object>> parameterListA
     ) {
-        // TODO(ville): Support the caller providing BaseTcpSource.javaown parameterization.
+        // TODO(ville): Support the caller providing own parameterization.
         // NOTE: Then multiply the two paramaterizations together.
         final List<Object[]> parameterSets = new ArrayList<>();
         for (final List<Object> factoryList : parameterListA) {
