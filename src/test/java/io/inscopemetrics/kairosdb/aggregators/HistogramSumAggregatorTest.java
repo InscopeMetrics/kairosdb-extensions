@@ -16,6 +16,7 @@
 
 package io.inscopemetrics.kairosdb.aggregators;
 
+import io.inscopemetrics.kairosdb.accumulators.AccumulatorFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -37,17 +38,21 @@ import static org.junit.Assert.assertTrue;
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 @RunWith(Parameterized.class)
-public final class HistogramSumAggregatorTest extends AbstractHistogramTest {
+public final class HistogramSumAggregatorTest {
 
-    private final CreateHistogramFromValues histogramCreatorFromValues;
+    private final AggregatorTestHelper.CreateHistogramFromValues histogramCreatorFromValues;
+    private final AccumulatorFactory accumulatorFactory;
 
-    public HistogramSumAggregatorTest(final CreateHistogramFromValues histogramCreatorFromValues) {
+    public HistogramSumAggregatorTest(
+            final AggregatorTestHelper.CreateHistogramFromValues histogramCreatorFromValues,
+            final AccumulatorFactory accumulatorFactory) {
         this.histogramCreatorFromValues = histogramCreatorFromValues;
+        this.accumulatorFactory = accumulatorFactory;
     }
 
     @Parameterized.Parameters(name = "{index}: {0}")
     public static Collection<Object[]> parameters() {
-        return createParametersFromValues();
+        return AggregatorTestHelper.createParametersFromValues(AggregatorTestHelper.createAccumulatorParameterizations());
     }
 
     @Test
@@ -58,7 +63,9 @@ public final class HistogramSumAggregatorTest extends AbstractHistogramTest {
         group.addDataPoint(histogramCreatorFromValues.create(2L, Arrays.asList(1.0, 5.0)));
         group.addDataPoint(histogramCreatorFromValues.create(2L, Arrays.asList(4.0, 2.0)));
 
-        final HistogramSumAggregator aggregator = new HistogramSumAggregator(new DoubleDataPointFactoryImpl());
+        final HistogramSumAggregator aggregator = new HistogramSumAggregator(
+                new DoubleDataPointFactoryImpl(),
+                accumulatorFactory);
 
         final DataPointGroup result = aggregator.aggregate(group);
         DoubleDataPoint resultDataPoint;
@@ -70,24 +77,6 @@ public final class HistogramSumAggregatorTest extends AbstractHistogramTest {
         resultDataPoint = (DoubleDataPoint) result.next();
         assertEquals(12.0, resultDataPoint.getDoubleValue(), 0.0001);
 
-        assertFalse(result.hasNext());
-    }
-
-    @Test
-    public void testDifferentMagnitudes() {
-        final ListDataPointGroup group = new ListDataPointGroup("HistogramSumAggregator.testDifferentMagnitudes");
-        group.addDataPoint(histogramCreatorFromValues.create(1L, Arrays.asList(1.0e16)));
-        for (int i = 0; i < 1000000; ++i) {
-            group.addDataPoint(histogramCreatorFromValues.create(1L, Arrays.asList(1.0)));
-        }
-
-        final HistogramSumAggregator aggregator = new HistogramSumAggregator(new DoubleDataPointFactoryImpl());
-
-        final DataPointGroup result = aggregator.aggregate(group);
-        DoubleDataPoint resultDataPoint;
-        assertTrue(result.hasNext());
-        resultDataPoint = (DoubleDataPoint) result.next();
-        assertEquals(1.0000000001E16, resultDataPoint.getDoubleValue(), 0.0001);
         assertFalse(result.hasNext());
     }
 }

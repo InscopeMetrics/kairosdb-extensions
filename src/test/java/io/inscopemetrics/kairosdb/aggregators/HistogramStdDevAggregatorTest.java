@@ -16,6 +16,7 @@
 
 package io.inscopemetrics.kairosdb.aggregators;
 
+import io.inscopemetrics.kairosdb.accumulators.AccumulatorFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -37,17 +38,21 @@ import static org.junit.Assert.assertTrue;
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 @RunWith(Parameterized.class)
-public final class HistogramStdDevAggregatorTest extends AbstractHistogramTest {
+public final class HistogramStdDevAggregatorTest {
 
-    private final CreateHistogramFromValues histogramCreatorFromValues;
+    private final AggregatorTestHelper.CreateHistogramFromValues histogramCreatorFromValues;
+    private final AccumulatorFactory accumulatorFactory;
 
-    public HistogramStdDevAggregatorTest(final CreateHistogramFromValues histogramCreatorFromValues) {
+    public HistogramStdDevAggregatorTest(
+            final AggregatorTestHelper.CreateHistogramFromValues histogramCreatorFromValues,
+            final AccumulatorFactory accumulatorFactory) {
         this.histogramCreatorFromValues = histogramCreatorFromValues;
+        this.accumulatorFactory = accumulatorFactory;
     }
 
-    @Parameterized.Parameters(name = "{index}: {0}")
+    @Parameterized.Parameters(name = "{index}: {0} {1}")
     public static Collection<Object[]> parameters() {
-        return createParametersFromValues();
+        return AggregatorTestHelper.createParametersFromValues(AggregatorTestHelper.createAccumulatorParameterizations());
     }
 
     @Test
@@ -59,7 +64,9 @@ public final class HistogramStdDevAggregatorTest extends AbstractHistogramTest {
         group.addDataPoint(histogramCreatorFromValues.create(1L, Arrays.asList(1091.0, 1361.3)));
         group.addDataPoint(histogramCreatorFromValues.create(1L, Arrays.asList(1490.5, 1956.1)));
 
-        final HistogramStdDevAggregator aggregator = new HistogramStdDevAggregator(new DoubleDataPointFactoryImpl());
+        final HistogramStdDevAggregator aggregator = new HistogramStdDevAggregator(
+                new DoubleDataPointFactoryImpl(),
+                accumulatorFactory);
 
         final DataPointGroup result = aggregator.aggregate(group);
         assertTrue(result.hasNext());

@@ -15,8 +15,10 @@
  */
 package io.inscopemetrics.kairosdb.aggregators;
 
+import com.arpnetworking.commons.math.Accumulator;
 import com.google.inject.Inject;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
+import io.inscopemetrics.kairosdb.accumulators.AccumulatorFactory;
 import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.aggregator.RangeAggregator;
 import org.kairosdb.core.annotation.FeatureComponent;
@@ -35,20 +37,25 @@ import java.util.Iterator;
         description = "Computes the mean value of the histograms.")
 public final class HistogramMeanAggregator extends RangeAggregator {
     private final DoubleDataPointFactory dataPointFactory;
+    private final AccumulatorFactory accumulatorFactory;
 
     /**
      * Public constructor.
      *
      * @param dataPointFactory A factory for creating DoubleDataPoints
+     * @param accumulatorFactory A factory for creating Accumulators
      */
     @Inject
-    public HistogramMeanAggregator(final DoubleDataPointFactory dataPointFactory) {
+    public HistogramMeanAggregator(
+            final DoubleDataPointFactory dataPointFactory,
+            final AccumulatorFactory accumulatorFactory) {
         this.dataPointFactory = dataPointFactory;
+        this.accumulatorFactory = accumulatorFactory;
     }
 
     @Override
     protected RangeSubAggregator getSubAggregator() {
-        return new HistogramMeanDataPointAggregator();
+        return new HistogramMeanDataPointAggregator(accumulatorFactory);
     }
 
     @Override
@@ -62,23 +69,29 @@ public final class HistogramMeanAggregator extends RangeAggregator {
     }
 
     private final class HistogramMeanDataPointAggregator implements RangeSubAggregator {
+        private final AccumulatorFactory accumulatorFactory;
+
+        HistogramMeanDataPointAggregator(final AccumulatorFactory accumulatorFactory) {
+            this.accumulatorFactory = accumulatorFactory;
+        }
+
         @Override
         public Iterable<DataPoint> getNextDataPoints(final long returnTime, final Iterator<DataPoint> dataPointRange) {
             long count = 0;
-            double sum = 0;
+            final Accumulator accumulator = accumulatorFactory.create();
             while (dataPointRange.hasNext()) {
                 final DataPoint dp = dataPointRange.next();
                 if (dp instanceof HistogramDataPoint) {
                     final HistogramDataPoint hist = (HistogramDataPoint) dp;
                     count += hist.getSampleCount();
-                    sum += hist.getSum();
+                    accumulator.accumulate(hist.getSum());
                 }
             }
 
             if (count == 0) {
                 return Collections.emptyList();
             }
-            return Collections.singletonList(dataPointFactory.createDataPoint(returnTime, sum / count));
+            return Collections.singletonList(dataPointFactory.createDataPoint(returnTime, accumulator.getSum() / count));
         }
     }
 }

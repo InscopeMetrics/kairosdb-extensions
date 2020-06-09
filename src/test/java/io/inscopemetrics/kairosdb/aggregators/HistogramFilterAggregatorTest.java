@@ -18,6 +18,7 @@ package io.inscopemetrics.kairosdb.aggregators;
 import com.google.common.collect.Lists;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
 import io.inscopemetrics.kairosdb.HistogramKeyUtility;
+import io.inscopemetrics.kairosdb.accumulators.AccumulatorFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +41,7 @@ import static org.junit.Assert.assertTrue;
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
 @RunWith(Parameterized.class)
-public final class HistogramFilterAggregatorTest extends AbstractHistogramTest {
+public final class HistogramFilterAggregatorTest {
     private static final HistogramKeyUtility KEY_UTILITY = HistogramKeyUtility.getInstance(7);
     private static final double NEG_516_0 = -516.0;
     private static final double NEG_512_0 = -512.0;
@@ -59,21 +60,25 @@ public final class HistogramFilterAggregatorTest extends AbstractHistogramTest {
     private static final double POS_512_0 = 512.0;
     private static final double POS_516_0 = 516;
 
-    private final CreateHistogramFromValues histogramCreatorFromValues;
+    private final AggregatorTestHelper.CreateHistogramFromValues histogramCreatorFromValues;
+    private final AccumulatorFactory accumulatorFactory;
     private HistogramFilterAggregator aggregator;
 
-    public HistogramFilterAggregatorTest(final CreateHistogramFromValues histogramCreatorFromValues) {
+    public HistogramFilterAggregatorTest(
+            final AggregatorTestHelper.CreateHistogramFromValues histogramCreatorFromValues,
+             final AccumulatorFactory accumulatorFactory) {
         this.histogramCreatorFromValues = histogramCreatorFromValues;
+        this.accumulatorFactory = accumulatorFactory;
     }
 
     @Parameterized.Parameters(name = "{index}: {0}")
     public static Collection<Object[]> parameters() {
-        return createParametersFromValues();
+        return AggregatorTestHelper.createParametersFromValues(AggregatorTestHelper.createAccumulatorParameterizations());
     }
 
     @Before
     public void setUp() {
-        aggregator = new HistogramFilterAggregator();
+        aggregator = new HistogramFilterAggregator(accumulatorFactory);
     }
 
     @Test(expected = NullPointerException.class)

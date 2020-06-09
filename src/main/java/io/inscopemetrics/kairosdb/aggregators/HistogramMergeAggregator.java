@@ -15,11 +15,13 @@
  */
 package io.inscopemetrics.kairosdb.aggregators;
 
+import com.arpnetworking.commons.math.Accumulator;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
 import io.inscopemetrics.kairosdb.HistogramDataPointV2Impl;
 import io.inscopemetrics.kairosdb.HistogramKeyUtility;
+import io.inscopemetrics.kairosdb.accumulators.AccumulatorFactory;
 import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.aggregator.RangeAggregator;
 import org.kairosdb.core.annotation.FeatureComponent;
@@ -41,15 +43,21 @@ public final class HistogramMergeAggregator extends RangeAggregator {
 
     private static final int MAX_PRECISION = 64;
 
+    private final AccumulatorFactory accumulatorFactory;
+
     /**
      * Public constructor.
+     *
+     * @param accumulatorFactory A factory for creating Accumulators
      */
     @Inject
-    public HistogramMergeAggregator() { }
+    public HistogramMergeAggregator(final AccumulatorFactory accumulatorFactory) {
+        this.accumulatorFactory = accumulatorFactory;
+    }
 
     @Override
     protected RangeSubAggregator getSubAggregator() {
-        return new HistogramMergeDataPointAggregator();
+        return new HistogramMergeDataPointAggregator(accumulatorFactory);
     }
 
     @Override
@@ -63,6 +71,13 @@ public final class HistogramMergeAggregator extends RangeAggregator {
     }
 
     private static final class HistogramMergeDataPointAggregator implements RangeSubAggregator {
+
+        private final AccumulatorFactory accumulatorFactory;
+
+        HistogramMergeDataPointAggregator(final AccumulatorFactory accumulatorFactory) {
+            this.accumulatorFactory = accumulatorFactory;
+        }
+
         @Override
         public Iterable<DataPoint> getNextDataPoints(final long returnTime, final Iterator<DataPoint> dataPointRange) {
             TreeMap<Double, Long> merged = Maps.newTreeMap();
@@ -70,9 +85,9 @@ public final class HistogramMergeAggregator extends RangeAggregator {
             HistogramKeyUtility keyUtility = HistogramKeyUtility.getInstance(precision);
             double min = Double.MAX_VALUE;
             double max = -Double.MAX_VALUE;
-            double sum = 0;
             long count = 0;
             long originalCount = 0;
+            final Accumulator accumulator = accumulatorFactory.create();
 
             while (dataPointRange.hasNext()) {
                 final DataPoint dp = dataPointRange.next();
@@ -118,10 +133,11 @@ public final class HistogramMergeAggregator extends RangeAggregator {
 
                     min = Math.min(min, hist.getMin());
                     max = Math.max(max, hist.getMax());
-                    sum += hist.getSum();
+                    accumulator.accumulate(hist.getSum());
                 }
             }
 
+            final double sum = accumulator.getSum();
             final double mean = sum / count;
 
             return Collections.singletonList(

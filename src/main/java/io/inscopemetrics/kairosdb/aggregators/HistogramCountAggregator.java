@@ -21,7 +21,6 @@ import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.aggregator.RangeAggregator;
 import org.kairosdb.core.annotation.FeatureComponent;
 import org.kairosdb.core.datapoints.DoubleDataPointFactory;
-import org.kairosdb.core.exception.KairosDBException;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -41,16 +40,15 @@ public final class HistogramCountAggregator extends RangeAggregator {
      * Public constructor.
      *
      * @param dataPointFactory A factory for creating DoubleDataPoints
-     * @throws KairosDBException on error
      */
     @Inject
-    public HistogramCountAggregator(final DoubleDataPointFactory dataPointFactory) throws KairosDBException {
+    public HistogramCountAggregator(final DoubleDataPointFactory dataPointFactory) {
         this.dataPointFactory = dataPointFactory;
     }
 
     @Override
     protected RangeSubAggregator getSubAggregator() {
-        return new HistogramMeanDataPointAggregator();
+        return new HistogramCountDataPointAggregator();
     }
 
     @Override
@@ -63,7 +61,7 @@ public final class HistogramCountAggregator extends RangeAggregator {
         return dataPointFactory.getGroupType();
     }
 
-    private final class HistogramMeanDataPointAggregator implements RangeSubAggregator {
+    private final class HistogramCountDataPointAggregator implements RangeSubAggregator {
 
         @Override
         public Iterable<DataPoint> getNextDataPoints(final long returnTime, final Iterator<DataPoint> dataPointRange) {

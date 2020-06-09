@@ -15,8 +15,10 @@
  */
 package io.inscopemetrics.kairosdb.aggregators;
 
+import com.arpnetworking.commons.math.Accumulator;
 import com.google.inject.Inject;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
+import io.inscopemetrics.kairosdb.accumulators.AccumulatorFactory;
 import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.aggregator.RangeAggregator;
 import org.kairosdb.core.annotation.FeatureComponent;
@@ -35,15 +37,20 @@ import java.util.Iterator;
         description = "Adds data points together.")
 public final class HistogramSumAggregator extends RangeAggregator {
     private final DoubleDataPointFactory dataPointFactory;
+    private final AccumulatorFactory accumulatorFactory;
 
     /**
      * Public constructor.
      *
      * @param dataPointFactory A factory for creating DoubleDataPoints
+     * @param accumulatorFactory A factory for creating Accumulators
      */
     @Inject
-    public HistogramSumAggregator(final DoubleDataPointFactory dataPointFactory) {
+    public HistogramSumAggregator(
+            final DoubleDataPointFactory dataPointFactory,
+            final AccumulatorFactory accumulatorFactory) {
         this.dataPointFactory = dataPointFactory;
+        this.accumulatorFactory = accumulatorFactory;
     }
 
     @Override
@@ -65,16 +72,17 @@ public final class HistogramSumAggregator extends RangeAggregator {
 
         @Override
         public Iterable<DataPoint> getNextDataPoints(final long returnTime, final Iterator<DataPoint> dataPointRange) {
-            double sum = 0;
+            final Accumulator accumulator = accumulatorFactory.create();
+
             while (dataPointRange.hasNext()) {
                 final DataPoint dp = dataPointRange.next();
                 if (dp instanceof HistogramDataPoint) {
                     final HistogramDataPoint hist = (HistogramDataPoint) dp;
-                    sum += hist.getSum();
+                    accumulator.accumulate(hist.getSum());
                 }
             }
 
-            return Collections.singletonList(dataPointFactory.createDataPoint(returnTime, sum));
+            return Collections.singletonList(dataPointFactory.createDataPoint(returnTime, accumulator.getSum()));
         }
     }
 }

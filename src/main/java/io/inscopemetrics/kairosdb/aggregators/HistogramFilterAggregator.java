@@ -15,11 +15,13 @@
  */
 package io.inscopemetrics.kairosdb.aggregators;
 
+import com.arpnetworking.commons.math.Accumulator;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
 import io.inscopemetrics.kairosdb.HistogramDataPointV2Impl;
 import io.inscopemetrics.kairosdb.HistogramKeyUtility;
+import io.inscopemetrics.kairosdb.accumulators.AccumulatorFactory;
 import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.aggregator.AggregatedDataPointGroupWrapper;
 import org.kairosdb.core.aggregator.FilterAggregator;
@@ -95,12 +97,16 @@ public class HistogramFilterAggregator implements Aggregator {
     )
     private double threshold;
 
+    private final AccumulatorFactory accumulatorFactory;
 
     /**
      * Public Constructor.
+     *
+     * @param accumulatorFactory A factory for creating Accumulators
      */
     @Inject
-    public HistogramFilterAggregator() {
+    public HistogramFilterAggregator(final AccumulatorFactory accumulatorFactory) {
+        this.accumulatorFactory = accumulatorFactory;
         threshold = 0.0;
         filterOp = FilterAggregator.FilterOperation.EQUAL;
         filterinc = FilterIndeterminate.KEEP;
@@ -120,7 +126,7 @@ public class HistogramFilterAggregator implements Aggregator {
 
     @Override
     public DataPointGroup aggregate(final DataPointGroup dataPointGroup) {
-        return new HistogramFilterDataPointAggregator(dataPointGroup);
+        return new HistogramFilterDataPointAggregator(dataPointGroup, accumulatorFactory);
     }
 
     @Override
@@ -140,8 +146,13 @@ public class HistogramFilterAggregator implements Aggregator {
 
     private class HistogramFilterDataPointAggregator extends AggregatedDataPointGroupWrapper {
 
-        HistogramFilterDataPointAggregator(final DataPointGroup innerDataPointGroup) {
+        private final AccumulatorFactory accumulatorFactory;
+
+        HistogramFilterDataPointAggregator(
+                final DataPointGroup innerDataPointGroup,
+                final AccumulatorFactory accumulatorFactory) {
             super(innerDataPointGroup);
+            this.accumulatorFactory = accumulatorFactory;
         }
 
         public boolean hasNext() {
@@ -184,9 +195,9 @@ public class HistogramFilterAggregator implements Aggregator {
 
             final long timeStamp = dp.getTimestamp();
             final TreeMap<Double, Long> filtered = Maps.newTreeMap();
+            final Accumulator accumulator = accumulatorFactory.create();
             double min = Double.MAX_VALUE;
             double max = -Double.MAX_VALUE;
-            double sum = 0;
             long count = 0;
 
             final HistogramDataPoint hist = (HistogramDataPoint) dp;
@@ -210,7 +221,7 @@ public class HistogramFilterAggregator implements Aggregator {
                             Math.max(
                                     entry.getKey(),
                                     histogramKeyUtility.binInclusiveBound(entry.getKey())));
-                    sum += entry.getKey() * entry.getValue();
+                    accumulator.accumulate(entry.getKey() * entry.getValue());
                     count += entry.getValue();
                 }
             }
@@ -227,6 +238,7 @@ public class HistogramFilterAggregator implements Aggregator {
                 max = hist.getMax();
             }
 
+            final double sum = accumulator.getSum();
             return Optional.of(
                     new HistogramDataPointV2Impl(
                             timeStamp,
