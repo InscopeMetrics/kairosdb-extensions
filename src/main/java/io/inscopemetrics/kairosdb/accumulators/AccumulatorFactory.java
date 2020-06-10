@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Inscope Metrics Inc.
+ * Copyright 2020 Dropbox
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.inscopemetrics.kairosdb.accumulators;
 
-@ParametersAreNonnullByDefault
-@ReturnValuesAreNonnullByDefault
-package io.inscopemetrics.kairosdb.integration;
+import com.arpnetworking.commons.math.Accumulator;
 
-import com.arpnetworking.commons.javax.annotation.ReturnValuesAreNonnullByDefault;
+/**
+ * Factory interface for creating {@link Accumulator} instances.
+ *
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
+ */
+public interface AccumulatorFactory {
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    /**
+     * Create a new {@link Accumulator} instance.
+     *
+     * @return a new {@link Accumulator} instance
+     */
+    Accumulator create();
+}

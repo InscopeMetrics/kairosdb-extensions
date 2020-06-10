@@ -18,6 +18,7 @@ package io.inscopemetrics.kairosdb.aggregators;
 
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
 import io.inscopemetrics.kairosdb.HistogramKeyUtility;
+import io.inscopemetrics.kairosdb.accumulators.AccumulatorFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -37,17 +38,21 @@ import static org.junit.Assert.assertTrue;
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 @RunWith(Parameterized.class)
-public final class HistogramMergeAggregatorTest extends AbstractHistogramTest {
+public final class HistogramMergeAggregatorTest {
 
-    private final CreateHistogramFromValues histogramCreatorFromValues;
+    private final AggregatorTestHelper.CreateHistogramFromValues histogramCreatorFromValues;
+    private final AccumulatorFactory accumulatorFactory;
 
-    public HistogramMergeAggregatorTest(final CreateHistogramFromValues histogramCreatorFromValues) {
+    public HistogramMergeAggregatorTest(
+            final AggregatorTestHelper.CreateHistogramFromValues histogramCreatorFromValues,
+            final AccumulatorFactory accumulatorFactory) {
         this.histogramCreatorFromValues = histogramCreatorFromValues;
+        this.accumulatorFactory = accumulatorFactory;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{index}: {0} {1}")
     public static Collection<Object[]> parameters() {
-        return createParametersFromValues();
+        return AggregatorTestHelper.createParametersFromValues(AggregatorTestHelper.createAccumulatorParameterizations());
     }
 
     @Test
@@ -60,7 +65,7 @@ public final class HistogramMergeAggregatorTest extends AbstractHistogramTest {
         group.addDataPoint(histogramCreatorFromValues.create(1L, Arrays.asList(4.0, 2.0)));
         group.addDataPoint(histogramCreatorFromValues.create(1L, Arrays.asList(3.0, 5.0)));
 
-        final HistogramMergeAggregator aggregator = new HistogramMergeAggregator();
+        final HistogramMergeAggregator aggregator = new HistogramMergeAggregator(accumulatorFactory);
 
         final DataPointGroup result = aggregator.aggregate(group);
         assertTrue(result.hasNext());

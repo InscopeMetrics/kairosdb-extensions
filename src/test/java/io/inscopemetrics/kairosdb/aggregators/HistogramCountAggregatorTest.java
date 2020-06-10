@@ -24,7 +24,6 @@ import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.datapoints.DoubleDataPoint;
 import org.kairosdb.core.datapoints.DoubleDataPointFactoryImpl;
 import org.kairosdb.core.datastore.DataPointGroup;
-import org.kairosdb.core.exception.KairosDBException;
 import org.kairosdb.testing.ListDataPointGroup;
 
 import java.util.Collection;
@@ -39,21 +38,21 @@ import static org.junit.Assert.assertTrue;
  * @author William Ehlhardt (whale at dropbox dot com)
  */
 @RunWith(Parameterized.class)
-public final class HistogramCountAggregatorTest extends AbstractHistogramTest {
+public final class HistogramCountAggregatorTest {
 
-    private final CreateHistogramFromCounts histogramCreatorFromCounts;
+    private final AggregatorTestHelper.CreateHistogramFromCounts histogramCreatorFromCounts;
 
-    public HistogramCountAggregatorTest(final CreateHistogramFromCounts histogramCreatorFromCounts) {
+    public HistogramCountAggregatorTest(final AggregatorTestHelper.CreateHistogramFromCounts histogramCreatorFromCounts) {
         this.histogramCreatorFromCounts = histogramCreatorFromCounts;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{index}: {0}")
     public static Collection<Object[]> parameters() {
-        return createParametersFromCounts();
+        return AggregatorTestHelper.createParametersFromCounts();
     }
 
     @Test
-    public void testCombineLargeValues() throws KairosDBException {
+    public void testCombineLargeValues() {
         final TreeMap<Double, Long> bins = Maps.newTreeMap();
         bins.put(1d, 2147483647L);
 

@@ -15,6 +15,7 @@
  */
 package io.inscopemetrics.kairosdb.aggregators;
 
+import io.inscopemetrics.kairosdb.accumulators.AccumulatorFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +27,6 @@ import org.kairosdb.core.datapoints.DoubleDataPoint;
 import org.kairosdb.core.datapoints.DoubleDataPointFactoryImpl;
 import org.kairosdb.core.datastore.DataPointGroup;
 import org.kairosdb.core.datastore.TimeUnit;
-import org.kairosdb.core.exception.KairosDBException;
 import org.kairosdb.plugin.Aggregator;
 import org.kairosdb.testing.HistogramUtils;
 import org.kairosdb.testing.ListDataPointGroup;
@@ -46,8 +46,9 @@ import static org.junit.Assert.assertTrue;
  * @author Joey Jackson (jjackson at dropbox dot com)
  */
 @RunWith(Parameterized.class)
-public final class HistogramPercentRemainingAggregatorTest extends AbstractHistogramTest {
+public final class HistogramPercentRemainingAggregatorTest {
 
+    private final AccumulatorFactory accumulatorFactory;
     private final List<DataPoint> singleHistGroup;
     private final List<DataPoint> singleDoubleGroup;
     private final List<DataPoint> emptyHistGroup;
@@ -57,7 +58,10 @@ public final class HistogramPercentRemainingAggregatorTest extends AbstractHisto
     private HistogramFilterAggregator filterAggregator;
     private HistogramMergeAggregator mergeAggregator;
 
-    public HistogramPercentRemainingAggregatorTest(final CreateHistogramFromValues histogramCreatorFromValues) {
+    public HistogramPercentRemainingAggregatorTest(
+            final AggregatorTestHelper.CreateHistogramFromValues histogramCreatorFromValues,
+            final AccumulatorFactory accumulatorFactory) {
+        this.accumulatorFactory = accumulatorFactory;
         singleHistGroup = Collections.singletonList(histogramCreatorFromValues.create(1L, Arrays.asList(1d, 10d, 100d, 1000d)));
         singleDoubleGroup = Collections.singletonList(new DoubleDataPoint(1L, 0d));
         emptyHistGroup = Collections.singletonList(histogramCreatorFromValues.create(1L, Collections.emptyList()));
@@ -67,19 +71,19 @@ public final class HistogramPercentRemainingAggregatorTest extends AbstractHisto
                 histogramCreatorFromValues.create(3L, Arrays.asList(30d, 40d, 50d, 60d)));
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{index}: {0}")
     public static Collection<Object[]> parameters() {
-        return createParametersFromValues();
+        return AggregatorTestHelper.createParametersFromValues(AggregatorTestHelper.createAccumulatorParameterizations());
     }
 
     @Before
-    public void setUp() throws KairosDBException {
+    public void setUp() {
         percentRemainingAggregator = new HistogramPercentRemainingAggregator(new DoubleDataPointFactoryImpl());
 
-        filterAggregator = new HistogramFilterAggregator();
+        filterAggregator = new HistogramFilterAggregator(accumulatorFactory);
         filterAggregator.setFilterIndeterminateInclusion(HistogramFilterAggregator.FilterIndeterminate.DISCARD);
 
-        mergeAggregator = new HistogramMergeAggregator();
+        mergeAggregator = new HistogramMergeAggregator(accumulatorFactory);
         mergeAggregator.setStartTime(1L);
         mergeAggregator.setSampling(new Sampling(10, TimeUnit.MINUTES));
     }

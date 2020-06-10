@@ -15,8 +15,10 @@
  */
 package io.inscopemetrics.kairosdb.aggregators;
 
+import com.arpnetworking.commons.math.Accumulator;
 import com.google.inject.Inject;
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
+import io.inscopemetrics.kairosdb.accumulators.AccumulatorFactory;
 import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.aggregator.RangeAggregator;
 import org.kairosdb.core.annotation.FeatureComponent;
@@ -37,20 +39,25 @@ import java.util.NavigableMap;
         description = "Computes the standard deviation value of the histograms.")
 public class HistogramStdDevAggregator extends RangeAggregator {
     private final DoubleDataPointFactory dataPointFactory;
+    private final AccumulatorFactory accumulatorFactory;
 
     /**
      * Public constructor.
      *
      * @param dataPointFactory A factory for creating DoubleDataPoints
+     * @param accumulatorFactory A factory for creating Accumulators
      */
     @Inject
-    public HistogramStdDevAggregator(final DoubleDataPointFactory dataPointFactory) {
+    public HistogramStdDevAggregator(
+            final DoubleDataPointFactory dataPointFactory,
+            final AccumulatorFactory accumulatorFactory) {
         this.dataPointFactory = dataPointFactory;
+        this.accumulatorFactory = accumulatorFactory;
     }
 
     @Override
     protected RangeSubAggregator getSubAggregator() {
-        return new HistogramStdDevDataPointAggregator();
+        return new HistogramStdDevDataPointAggregator(accumulatorFactory);
     }
 
     @Override
@@ -64,33 +71,40 @@ public class HistogramStdDevAggregator extends RangeAggregator {
     }
 
     private final class HistogramStdDevDataPointAggregator implements RangeSubAggregator {
+        private final AccumulatorFactory accumulatorFactory;
+
+        HistogramStdDevDataPointAggregator(final AccumulatorFactory accumulatorFactory) {
+            this.accumulatorFactory = accumulatorFactory;
+        }
 
         @Override
         public Iterable<DataPoint> getNextDataPoints(final long returnTime, final Iterator<DataPoint> dataPointRange) {
             long count = 0;
-            double mean = 0;
-            double m2 = 0;
+            final Accumulator meanAccumulator = accumulatorFactory.create();
+            final Accumulator meanSquaredAccumulator = accumulatorFactory.create();
+
             while (dataPointRange.hasNext()) {
                 final DataPoint dp = dataPointRange.next();
                 if (dp instanceof HistogramDataPoint) {
                     final HistogramDataPoint hist = (HistogramDataPoint) dp;
                     final NavigableMap<Double, Long> map = hist.getMap();
-                    if (map != null) {
-                        for (final Map.Entry<Double, Long> entry : map.entrySet()) {
-                            final long n = entry.getValue();
-                            if (n > 0) {
-                                final double x = entry.getKey();
-                                count += n;
-                                final double delta = x - mean;
-                                mean += ((double) n / count) * delta;
-                                m2 += n * delta * (x - mean);
-                            }
+                    for (final Map.Entry<Double, Long> entry : map.entrySet()) {
+                        final long n = entry.getValue();
+                        if (n > 0) {
+                            final double x = entry.getKey();
+                            count += n;
+                            final double delta = x - meanAccumulator.getSum();
+                            meanAccumulator.accumulate(((double) n / count) * delta);
+                            meanSquaredAccumulator.accumulate(n * delta * (x - meanAccumulator.getSum()));
                         }
                     }
                 }
             }
 
-            return Collections.singletonList(dataPointFactory.createDataPoint(returnTime, Math.sqrt(m2 / (count - 1))));
+            return Collections.singletonList(
+                    dataPointFactory.createDataPoint(
+                            returnTime,
+                            Math.sqrt(meanSquaredAccumulator.getSum() / (count - 1))));
         }
     }
 }

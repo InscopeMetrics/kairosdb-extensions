@@ -128,13 +128,11 @@ public final class KairosHelper {
             final JSONObject aggregatorJson = new JSONObject();
             aggregatorJson.put("name", aggregatorAndParams.getAggregator());
 
-            if (aggregatorAndParams.getParams() != null) {
-                final JSONObject aggregatorParameters = new JSONObject(aggregatorAndParams.getParams());
-                final JSONArray names = aggregatorParameters.names();
-                if (names != null) {
-                    for (int i = 0; i < names.length(); i++) {
-                        aggregatorJson.putOnce((String) names.get(i), aggregatorParameters.get((String) names.get(i)));
-                    }
+            final JSONObject aggregatorParameters = new JSONObject(aggregatorAndParams.getParams());
+            final JSONArray names = aggregatorParameters.names();
+            if (names != null) {
+                for (int i = 0; i < names.length(); i++) {
+                    aggregatorJson.putOnce((String) names.get(i), aggregatorParameters.get((String) names.get(i)));
                 }
             }
 

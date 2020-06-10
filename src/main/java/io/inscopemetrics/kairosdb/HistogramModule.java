@@ -15,14 +15,18 @@
  */
 package io.inscopemetrics.kairosdb;
 
-
+import com.arpnetworking.commons.math.Accumulator;
+import com.arpnetworking.commons.math.NaiveAccumulator;
 import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.inscopemetrics.kairosdb.accumulators.AccumulatorFactory;
+import io.inscopemetrics.kairosdb.accumulators.AccumulatorFromClassFactory;
 import io.inscopemetrics.kairosdb.aggregators.DelegatingAvgAggregator;
 import io.inscopemetrics.kairosdb.aggregators.DelegatingCountAggregator;
 import io.inscopemetrics.kairosdb.aggregators.DelegatingFilterAggregator;
@@ -56,6 +60,8 @@ import org.kairosdb.core.aggregator.SumAggregator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.MissingResourceException;
+import java.util.Properties;
 import javax.inject.Provider;
 
 /**
@@ -67,6 +73,9 @@ import javax.inject.Provider;
  */
 @SuppressWarnings("unchecked")
 public class HistogramModule extends AbstractModule {
+
+    private static final String ACCUMULATOR_CLASS_PROPERTY = "kairosdb.inscopemetrics.extensions.accumulator.class";
+    private static final String DEFAULT_ACCUMULATOR_CLASS_NAME = NaiveAccumulator.class.getName();
     private static final Logger LOGGER = LoggerFactory.getLogger(HistogramModule.class);
 
     @Override
@@ -74,6 +83,8 @@ public class HistogramModule extends AbstractModule {
         LOGGER.info("Binding HistogramModule");
         bind(HistogramDataPointV2Factory.class).in(Scopes.SINGLETON);
         bind(HistogramDataPointFactory.class).in(Scopes.SINGLETON);
+
+        bind(AccumulatorFactory.class).toProvider(AccumulatorFactoryProvider.class);
 
         bind(DelegatingAvgAggregator.class);
         bind(HistogramMeanAggregator.class);
@@ -194,5 +205,33 @@ public class HistogramModule extends AbstractModule {
             final Provider<HistogramFilterAggregator> histProvider,
             final Provider<FilterAggregator> filterProvider) {
         return new DelegatingAggregatorMap(factory, Lists.newArrayList(histProvider, filterProvider));
+    }
+
+    static <T> Class<T> getClassForProperty(final Properties properties, final String propertyName) {
+        final String className = properties.getProperty(propertyName, DEFAULT_ACCUMULATOR_CLASS_NAME);
+
+        try {
+            @SuppressWarnings("unchecked")
+            final Class<T> clazz = (Class<T>) HistogramModule.class.getClassLoader().loadClass(className);
+            return clazz;
+        } catch (final ClassNotFoundException e) {
+            throw new MissingResourceException("Unable to load class", className, propertyName);
+        }
+    }
+
+    static final class AccumulatorFactoryProvider implements Provider<AccumulatorFactory> {
+
+        private final Properties properties;
+
+        @Inject
+        AccumulatorFactoryProvider(final Properties properties) {
+            this.properties = properties;
+        }
+
+        @Override
+        public AccumulatorFactory get() {
+            final Class<? extends Accumulator> accumulatorClass = getClassForProperty(properties, ACCUMULATOR_CLASS_PROPERTY);
+            return new AccumulatorFromClassFactory(accumulatorClass);
+        }
     }
 }

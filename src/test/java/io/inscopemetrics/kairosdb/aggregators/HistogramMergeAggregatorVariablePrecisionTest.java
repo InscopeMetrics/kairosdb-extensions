@@ -18,12 +18,16 @@ package io.inscopemetrics.kairosdb.aggregators;
 
 import io.inscopemetrics.kairosdb.HistogramDataPoint;
 import io.inscopemetrics.kairosdb.HistogramKeyUtility;
+import io.inscopemetrics.kairosdb.accumulators.AccumulatorFactory;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.kairosdb.core.datastore.DataPointGroup;
 import org.kairosdb.testing.HistogramUtils;
 import org.kairosdb.testing.ListDataPointGroup;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -35,12 +39,16 @@ import static org.junit.Assert.assertTrue;
  *
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
+@RunWith(Parameterized.class)
 public final class HistogramMergeAggregatorVariablePrecisionTest {
 
+    private final AccumulatorFactory accumulatorFactory;
     private final HistogramKeyUtility keyUtility = HistogramKeyUtility.getInstance(4);
     private final ListDataPointGroup group = new ListDataPointGroup("VariablePrecisionTest");
 
-    public HistogramMergeAggregatorVariablePrecisionTest() {
+    public HistogramMergeAggregatorVariablePrecisionTest(final AccumulatorFactory accumulatorFactory) {
+        this.accumulatorFactory = accumulatorFactory;
+
         // All values above are represented as-is at precision 7 but truncate
         // to the following at precision 4:
         //
@@ -55,9 +63,14 @@ public final class HistogramMergeAggregatorVariablePrecisionTest {
         group.addDataPoint(HistogramUtils.createHistogramV2(1L, (byte) 4, Arrays.asList(1475.0, 1735.0)));
     }
 
+    @Parameterized.Parameters(name = "{index}: {0}")
+    public static Collection<Object[]> parameters() {
+        return AggregatorTestHelper.createAccumulatorParameterizations();
+    }
+
     @Test
     public void testHigherToLower() {
-        final HistogramMergeAggregator aggregator = new HistogramMergeAggregator();
+        final HistogramMergeAggregator aggregator = new HistogramMergeAggregator(accumulatorFactory);
 
         final DataPointGroup result = aggregator.aggregate(group);
         assertTrue(result.hasNext());
@@ -67,7 +80,7 @@ public final class HistogramMergeAggregatorVariablePrecisionTest {
 
     @Test
     public void testLowerToHigher() {
-        final HistogramMergeAggregator aggregator = new HistogramMergeAggregator();
+        final HistogramMergeAggregator aggregator = new HistogramMergeAggregator(accumulatorFactory);
 
         final DataPointGroup result = aggregator.aggregate(group);
         assertTrue(result.hasNext());

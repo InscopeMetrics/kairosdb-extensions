@@ -16,6 +16,7 @@
 
 package io.inscopemetrics.kairosdb.aggregators;
 
+import io.inscopemetrics.kairosdb.accumulators.AccumulatorFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -37,18 +38,21 @@ import static org.junit.Assert.assertTrue;
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 @RunWith(Parameterized.class)
-public final class HistogramSumAggregatorTest extends AbstractHistogramTest {
+public final class HistogramSumAggregatorTest {
 
-    private final CreateHistogramFromValues histogramCreatorFromValues;
+    private final AggregatorTestHelper.CreateHistogramFromValues histogramCreatorFromValues;
+    private final AccumulatorFactory accumulatorFactory;
 
     public HistogramSumAggregatorTest(
-            final CreateHistogramFromValues histogramCreatorFromValues) {
+            final AggregatorTestHelper.CreateHistogramFromValues histogramCreatorFromValues,
+            final AccumulatorFactory accumulatorFactory) {
         this.histogramCreatorFromValues = histogramCreatorFromValues;
+        this.accumulatorFactory = accumulatorFactory;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{index}: {0}")
     public static Collection<Object[]> parameters() {
-        return createParametersFromValues();
+        return AggregatorTestHelper.createParametersFromValues(AggregatorTestHelper.createAccumulatorParameterizations());
     }
 
     @Test
@@ -59,7 +63,9 @@ public final class HistogramSumAggregatorTest extends AbstractHistogramTest {
         group.addDataPoint(histogramCreatorFromValues.create(2L, Arrays.asList(1.0, 5.0)));
         group.addDataPoint(histogramCreatorFromValues.create(2L, Arrays.asList(4.0, 2.0)));
 
-        final HistogramSumAggregator aggregator = new HistogramSumAggregator(new DoubleDataPointFactoryImpl());
+        final HistogramSumAggregator aggregator = new HistogramSumAggregator(
+                new DoubleDataPointFactoryImpl(),
+                accumulatorFactory);
 
         final DataPointGroup result = aggregator.aggregate(group);
         DoubleDataPoint resultDataPoint;

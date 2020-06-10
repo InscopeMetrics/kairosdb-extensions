@@ -173,6 +173,19 @@ dependencies are running locally on the default ports.
 * To debug KairosDb while executing an integration test against it simply launch KairosDb for debug,
 then attach your IDE and finally run/debug the integration test from your IDE.
 
+### Performance Testing
+
+Running:
+
+    commokairosdb-extensionss> ./jdk-wrapper.sh ./mvnw test -PunitPerformanceTest
+
+Results:
+
+* JSON formatted performance results are generated into `target/perf` as specified in each test's `JsonBenchmarkConsumer`.
+* Each JSON performance result file references an [HPROF](https://docs.oracle.com/javase/8/docs/technotes/samples/hprof.html) cpu profile generated during the test in `profileFile` field.
+* The performance profiles are text files and have been prefiltered using [performance-test](https://github.com/ArpNetworking/performance-test).
+
+
 License
 -------
 

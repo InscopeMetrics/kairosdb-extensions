@@ -37,17 +37,17 @@ import static org.junit.Assert.assertTrue;
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 @RunWith(Parameterized.class)
-public final class HistogramMinAggregatorTest extends AbstractHistogramTest {
+public final class HistogramMinAggregatorTest {
 
-    private final CreateHistogramFromValues histogramCreatorFromValues;
+    private final AggregatorTestHelper.CreateHistogramFromValues histogramCreatorFromValues;
 
-    public HistogramMinAggregatorTest(final CreateHistogramFromValues histogramCreatorFromValues) {
+    public HistogramMinAggregatorTest(final AggregatorTestHelper.CreateHistogramFromValues histogramCreatorFromValues) {
         this.histogramCreatorFromValues = histogramCreatorFromValues;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{index}: {0}")
     public static Collection<Object[]> parameters() {
-        return createParametersFromValues();
+        return AggregatorTestHelper.createParametersFromValues();
     }
 
     @Test

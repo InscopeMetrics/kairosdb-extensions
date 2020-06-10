@@ -17,6 +17,7 @@
 package io.inscopemetrics.kairosdb.aggregators;
 
 import com.google.common.collect.ImmutableMap;
+import io.inscopemetrics.kairosdb.accumulators.AccumulatorFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -38,21 +39,24 @@ import static org.junit.Assert.assertTrue;
  * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 @RunWith(Parameterized.class)
-public final class HistogramMeanAggregatorTest extends AbstractHistogramTest {
+public final class HistogramMeanAggregatorTest {
 
-    private final CreateHistogramFromValues histogramCreatorFromValues;
-    private final CreateHistogramFromCounts histogramCreatorFromCounts;
+    private final AggregatorTestHelper.CreateHistogramFromValues histogramCreatorFromValues;
+    private final AggregatorTestHelper.CreateHistogramFromCounts histogramCreatorFromCounts;
+    private final AccumulatorFactory accumulatorFactory;
 
     public HistogramMeanAggregatorTest(
-            final CreateHistogramFromValues histogramCreatorFromValues,
-            final CreateHistogramFromCounts histogramCreatorFromCounts) {
+            final AggregatorTestHelper.CreateHistogramFromValues histogramCreatorFromValues,
+            final AggregatorTestHelper.CreateHistogramFromCounts histogramCreatorFromCounts,
+            final AccumulatorFactory accumulatorFactory) {
         this.histogramCreatorFromValues = histogramCreatorFromValues;
         this.histogramCreatorFromCounts = histogramCreatorFromCounts;
+        this.accumulatorFactory = accumulatorFactory;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{index}: {0} {2}")
     public static Collection<Object[]> parameters() {
-        return createParameters();
+        return AggregatorTestHelper.createParameters(AggregatorTestHelper.createAccumulatorParameterizations());
     }
 
     @Test
@@ -63,7 +67,9 @@ public final class HistogramMeanAggregatorTest extends AbstractHistogramTest {
         group.addDataPoint(histogramCreatorFromValues.create(2L, Arrays.asList(1.0, 5.0)));
         group.addDataPoint(histogramCreatorFromValues.create(2L, Arrays.asList(4.0, 2.0)));
 
-        final HistogramMeanAggregator aggregator = new HistogramMeanAggregator(new DoubleDataPointFactoryImpl());
+        final HistogramMeanAggregator aggregator = new HistogramMeanAggregator(
+                new DoubleDataPointFactoryImpl(),
+                accumulatorFactory);
 
         final DataPointGroup result = aggregator.aggregate(group);
         DoubleDataPoint resultDataPoint;
@@ -78,6 +84,27 @@ public final class HistogramMeanAggregatorTest extends AbstractHistogramTest {
         assertFalse(result.hasNext());
     }
 
+    /*
+    // TODO(ville): Logic for computing average of empty histogram fails for other reasons.
+    // Ref: https://github.com/InscopeMetrics/kairosdb-extensions/issues/34
+    @Test
+    public void tesEmptyBinsAverage() {
+        final ListDataPointGroup group = new ListDataPointGroup("HistogramMeanAggregator.tesNoDataAverage");
+        group.addDataPoint(new HistogramDataPointV2Impl(0L, 7, new TreeMap<>(), 0.0, 0.0, 0.0, 0.0));
+
+        final HistogramMeanAggregator aggregator = new HistogramMeanAggregator(
+                new DoubleDataPointFactoryImpl(),
+                accumulatorFactory);
+
+        final DataPointGroup result = aggregator.aggregate(group);
+        assertTrue(result.hasNext());
+        final DoubleDataPoint resultDataPoint = (DoubleDataPoint) result.next();
+        assertEquals(0.0, resultDataPoint.getDoubleValue(), 0.0001);
+
+        assertFalse(result.hasNext());
+    }
+    */
+
     @Test
     public void testCountDoesNotOverflow() {
         final ListDataPointGroup group = new ListDataPointGroup("HistogramMeanAggregator.testCountDoesNotOverflow");
@@ -87,7 +114,9 @@ public final class HistogramMeanAggregatorTest extends AbstractHistogramTest {
                     ImmutableMap.of(1.0d, 1000000L)));
         }
 
-        final HistogramMeanAggregator aggregator = new HistogramMeanAggregator(new DoubleDataPointFactoryImpl());
+        final HistogramMeanAggregator aggregator = new HistogramMeanAggregator(
+                new DoubleDataPointFactoryImpl(),
+                accumulatorFactory);
 
         final DataPointGroup result = aggregator.aggregate(group);
         assertTrue(result.hasNext());
