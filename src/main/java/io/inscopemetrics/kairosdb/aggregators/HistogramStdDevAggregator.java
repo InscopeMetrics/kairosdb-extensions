@@ -88,16 +88,14 @@ public class HistogramStdDevAggregator extends RangeAggregator {
                 if (dp instanceof HistogramDataPoint) {
                     final HistogramDataPoint hist = (HistogramDataPoint) dp;
                     final NavigableMap<Double, Long> map = hist.getMap();
-                    if (map != null) {
-                        for (final Map.Entry<Double, Long> entry : map.entrySet()) {
-                            final long n = entry.getValue();
-                            if (n > 0) {
-                                final double x = entry.getKey();
-                                count += n;
-                                final double delta = x - meanAccumulator.getSum();
-                                meanAccumulator.accumulate(((double) n / count) * delta);
-                                meanSquaredAccumulator.accumulate(n * delta * (x - meanAccumulator.getSum()));
-                            }
+                    for (final Map.Entry<Double, Long> entry : map.entrySet()) {
+                        final long n = entry.getValue();
+                        if (n > 0) {
+                            final double x = entry.getKey();
+                            count += n;
+                            final double delta = x - meanAccumulator.getSum();
+                            meanAccumulator.accumulate(((double) n / count) * delta);
+                            meanSquaredAccumulator.accumulate(n * delta * (x - meanAccumulator.getSum()));
                         }
                     }
                 }

@@ -36,7 +36,7 @@ import java.util.Map;
 /**
  * Aggregator test helper.
  *
- * @author Ville Koskela (ville at koskilabs dot com)
+ * @author Ville Koskela (ville dot koskela at inscopemetrics dot io)
  */
 public final class AggregatorTestHelper {
 

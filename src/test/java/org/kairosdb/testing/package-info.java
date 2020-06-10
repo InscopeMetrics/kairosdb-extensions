@@ -15,10 +15,9 @@
  */
 
 @ParametersAreNonnullByDefault
-// TODO(ville): Add commons dependency and mark variables as nonnull by default.
-//@ReturnValuesAreNonnullByDefault
+@ReturnValuesAreNonnullByDefault
 package org.kairosdb.testing;
 
-//import com.arpnetworking.commons.javax.annotation.ReturnValuesAreNonnullByDefault;
+import com.arpnetworking.commons.javax.annotation.ReturnValuesAreNonnullByDefault;
 
 import javax.annotation.ParametersAreNonnullByDefault;

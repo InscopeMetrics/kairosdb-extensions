@@ -85,6 +85,8 @@ public final class HistogramMeanAggregatorTest {
     }
 
     /*
+    // TODO(ville): Logic for computing average of empty histogram fails for other reasons.
+    // Ref: https://github.com/InscopeMetrics/kairosdb-extensions/issues/34
     @Test
     public void tesEmptyBinsAverage() {
         final ListDataPointGroup group = new ListDataPointGroup("HistogramMeanAggregator.tesNoDataAverage");
