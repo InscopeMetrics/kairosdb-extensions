@@ -12,29 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM openjdk:8u212-jre-alpine
+FROM inscopemetrics/kairosdb:1.2.2
 
 MAINTAINER inscopemetrics
 
-EXPOSE 8080
-
-# Configuration
-ENV JAVA_OPTS=""
-
-# Build: KairosDb dependencies
-RUN apk --no-cache --update add bash
-
-# Build: KairosDb
-RUN apk --no-cache --update add curl; \
-  mkdir /opt; \
-  cd /opt; \
-  curl -L https://github.com/kairosdb/kairosdb/releases/download/v1.2.2/kairosdb-1.2.2-1.tar.gz | tar zxfp - ; \
-  apk del curl
-
 # Build: Extensions
-ADD deps /opt/kairosdb/lib/
-ADD config /opt/kairosdb/conf/
-ADD lib /opt/kairosdb/lib/
+ADD deps /opt/kairosdb/lib/ext/
+ADD config /opt/kairosdb/config/
+ADD lib /opt/kairosdb/lib/ext/
 
-# Entry point
-ENTRYPOINT ["/opt/kairosdb/bin/kairosdb.sh", "run"]
