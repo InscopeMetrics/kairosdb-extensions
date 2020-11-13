@@ -336,6 +336,11 @@ public class MovingWindowAggregator extends RangeAggregator {
         public void setDataPointGroup(final DataPointGroup dataPointGroup) {
             wrappedDataPoint.setDataPointGroup(dataPointGroup);
         }
+
+        @Override
+        public long getSampleCount() {
+            return wrappedDataPoint.getSampleCount();
+        }
     }
 
     /**

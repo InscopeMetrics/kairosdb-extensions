@@ -121,8 +121,10 @@
     <dockerJavaOptions />
     <debugJavaPort>9004</debugJavaPort>
 
-    <!-- Docker -->
+    <!-- Docker Overrides -->
     <skipDockerBuild>false</skipDockerBuild>
+    <docker.skip.cassandra>false</docker.skip.cassandra>
+    <docker.cassandra.version>3.11</docker.cassandra.version>
   </properties>
   <build>
     <resources>
@@ -255,6 +257,27 @@
           <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
           <showLogs>true</showLogs>
           <images>
+            <!-- Cassandra -->
+            <image>
+              <name>cassandra:${docker.cassandra.version}</name>
+              <alias>cassandra</alias>
+              <run>
+                <skip>${docker.skip.cassandra}</skip>
+                <network>
+                  <mode>custom</mode>
+                  <name>kdb-ext-net</name>
+                  <alias>cassandra</alias>
+                </network>
+                <ports>
+                  <port>+cassandra.ip:7000:7000</port>
+                  <port>+cassandra.ip:9042:9042</port>
+                </ports>
+                <wait>
+                  <log>Starting listening for CQL clients on</log>
+                  <time>30000</time>
+                </wait>
+              </run>
+            </image>
             <!-- KairosDb -->
             <image>
               <name>inscopemetrics/kairosdb-extensions:${project.version}</name>
@@ -266,18 +289,25 @@
                 </tags>
               </build>
               <run>
-                <env>
-                  <JAVA_OPTS>${dockerJavaOptions}</JAVA_OPTS>
-                </env>
+                <dependsOn>
+                  <container>cassandra</container>
+                </dependsOn>
                 <network>
                   <mode>custom</mode>
-                  <name>kairosdb-net</name>
+                  <name>kdb-ext-net</name>
                   <alias>kairosdb</alias>
                 </network>
                 <ports>
                   <port>+kairosdb.ip:${debugJavaPort}:${debugJavaPort}</port>
                   <port>+kairosdb.ip:8082:8080</port>
                 </ports>
+                <env>
+                  <JAVA_OPTS>-Dkairosdb.datastore.cassandra.cql_host_list=cassandra -Dkairosdb.queue_processor.class=org.kairosdb.core.queue.MemoryQueueProcessor ${dockerJavaOptions}</JAVA_OPTS>
+                  <!-- TODO(ville): Obtain these from the current user! -->
+                  <!-- Ref: https://github.com/rynr/user-id-maven-plugin -->
+                  <KDB_UID>1000</KDB_UID>
+                  <KDB_GID>1000</KDB_GID>
+                </env>
                 <volumes>
                   <bind>
                     <volume>${project.basedir}/logs/docker:/opt/kairosdb/logs</volume>
