@@ -38,12 +38,6 @@ public interface HistogramDataPoint extends DataPoint {
     long getOriginalCount();
 
     /**
-     * Getter for sample count contained in this HistogramDataPoint.
-     * @return datapoint sample count
-     */
-    long getSampleCount();
-
-    /**
      * Getter for the sum of all samples contained in this HistogramDataPoint.
      * @return sum of histogram samples
      */

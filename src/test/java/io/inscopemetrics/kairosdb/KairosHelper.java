@@ -16,14 +16,20 @@
 package io.inscopemetrics.kairosdb;
 
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
 import org.kairosdb.testing.AggregatorAndParams;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.function.Consumer;
 
 /**
  * Utility functions for building KairosDB queries and objects.
@@ -31,9 +37,56 @@ import java.io.UnsupportedEncodingException;
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
 public final class KairosHelper {
+    private static final int QUERY_ATTEMPTS = 3;
+    private static final long QUERY_ATTEMPT_INTERVAL_MILLIS = 500;
+    private static final int EXPECTED_HISTOGRAM_POST_STATUS = 204;
     private static final long TIME_TO_LIVE_IN_SECONDS = 600;
 
     private KairosHelper() { }
+
+    /**
+     * Store a histogram and query to verify the result.
+     *
+     * @param client the HTTP client to use
+     * @param queryRequest the query request to execute
+     * @param timestamp timestamp of the datapoint
+     * @param histogram the histogram
+     * @param metricName the name of the metric
+     * @param verifier verification consumer of query response
+     * @throws JSONException on a JSON error
+     * @throws IOException on HTTP client error
+     */
+    public static void postAndVerifyHistogram(
+            final CloseableHttpClient client,
+            final HttpPost queryRequest,
+            final int timestamp,
+            final Histogram histogram,
+            final String metricName,
+            final Consumer<CloseableHttpResponse> verifier)
+            throws JSONException, IOException {
+        final HttpPost storeRequest = postHistogram(timestamp, histogram, metricName);
+        final HttpResponse storeResponse = client.execute(storeRequest);
+        Assert.assertEquals(EXPECTED_HISTOGRAM_POST_STATUS, storeResponse.getStatusLine().getStatusCode());
+        int attemptsRemaining = QUERY_ATTEMPTS;
+        while (true) {
+            try {
+                try (CloseableHttpResponse queryResponse = client.execute(queryRequest)) {
+                    verifier.accept(queryResponse);
+                }
+                return;
+            } catch (final AssertionError | Exception e) {
+                attemptsRemaining--;
+                if (attemptsRemaining == 0) {
+                    throw new RuntimeException(e);
+                }
+            }
+            try {
+                Thread.sleep(QUERY_ATTEMPT_INTERVAL_MILLIS);
+            } catch (final InterruptedException interruptedException) {
+                Thread.interrupted();
+            }
+        }
+    }
 
     /**
      * Creates the JSON body for a datapoint POST.
@@ -70,6 +123,7 @@ public final class KairosHelper {
             throw new RuntimeException(e);
         }
         post.addHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+
         return post;
     }
 

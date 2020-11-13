@@ -38,6 +38,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import static org.junit.Assert.assertEquals;
 
@@ -154,14 +155,20 @@ public final class AggregationIT {
 
     // ****  percentile aggregator ***
     @Test
-    public void testPercentileRequiresPercentile() throws IOException, JSONException {
-        queryWithExpectedCode("metric", 1000, "percentile", samplingParam(), 400);
+    public void testPercentileRequiresPercentile() {
+        queryWithExpectedCode(
+                "metric",
+                1000,
+                "percentile",
+                samplingParam(),
+                400,
+                body -> { });
     }
 
     @Test
-    public void testPercentileRequiresPercentileInRange() throws IOException, JSONException {
-        queryWithExpectedCode("metric", 1000, "percentile", percentileParam(-1), 400);
-        queryWithExpectedCode("metric", 1000, "percentile", percentileParam(101), 400);
+    public void testPercentileRequiresPercentileInRange() {
+        queryWithExpectedCode("metric", 1000, "percentile", percentileParam(-1), 400, body -> { });
+        queryWithExpectedCode("metric", 1000, "percentile", percentileParam(101), 400, body -> { });
     }
 
     @Test
@@ -190,13 +197,13 @@ public final class AggregationIT {
 
     // ****  apdex aggregator ***
     @Test
-    public void testApdexRequiresTarget() throws IOException, JSONException {
-        queryWithExpectedCode("metric", 1000, "apdex", samplingParam(), 400);
+    public void testApdexRequiresTarget() {
+        queryWithExpectedCode("metric", 1000, "apdex", samplingParam(), 400, body -> { });
     }
 
     @Test
-    public void testApdexRequiresTargetInRange() throws IOException, JSONException {
-        queryWithExpectedCode("metric", 1000, "apdex", apdexParam(-5), 400);
+    public void testApdexRequiresTargetInRange() {
+        queryWithExpectedCode("metric", 1000, "apdex", apdexParam(-5), 400, body -> { });
     }
 
     @Test
@@ -239,11 +246,22 @@ public final class AggregationIT {
     }
 
     @Test
-    public void testAggregateEmptyResults() throws IOException, JSONException {
-        final String body = queryWithExpectedCode("non_existing_metric", 1000, "sum", Collections.emptyMap(), 200);
-        final JSONObject responseJson = new JSONObject(body);
-        final JSONObject queryObject = responseJson.getJSONArray("queries").getJSONObject(0);
-        assertEquals(0, queryObject.getInt("sample_size"));
+    public void testAggregateEmptyResults() {
+        queryWithExpectedCode(
+                "non_existing_metric",
+                1000,
+                "sum",
+                Collections.emptyMap(),
+                200,
+                body -> {
+                    try {
+                        final JSONObject responseJson = new JSONObject(body);
+                        final JSONObject queryObject = responseJson.getJSONArray("queries").getJSONObject(0);
+                        assertEquals(0, queryObject.getInt("sample_size"));
+                    } catch (final JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
     }
 
     // **** filter aggregator ***
@@ -441,8 +459,13 @@ public final class AggregationIT {
             postDoubleWithExpectedCode(metricName, i++, number, 204);
         }
 
-        final String body = queryWithExpectedCode(metricName, 1000 + data.size(), aggregator, aggParams, 200);
-        verifyQueryResponse(data.size(), expected, body);
+        queryWithExpectedCode(
+                metricName,
+                1000 + data.size(),
+                aggregator,
+                aggParams,
+                200,
+                body -> verifyQueryResponse(data.size(), expected, body));
     }
 
     private void testDoubleAggregate(
@@ -458,8 +481,13 @@ public final class AggregationIT {
             postDoubleWithExpectedCode(metricName, i++, number, 204);
         }
 
-        final String body = queryWithExpectedCode(metricName, 1000 + data.size(), aggregator, aggParams, 200);
-        verifyQueryResponseDouble(data.size(), expected, body);
+        queryWithExpectedCode(
+                metricName,
+                1000 + data.size(),
+                aggregator,
+                aggParams,
+                200,
+                body -> verifyQueryResponseDouble(data.size(), expected, body));
     }
 
     private void testAggregate(
@@ -475,8 +503,13 @@ public final class AggregationIT {
             postHistogramWithExpectedCode(metricName, i++, histogram, 204);
         }
 
-        final String body = queryWithExpectedCode(metricName, 1000 + histograms.size(), aggregator, aggParams, 200);
-        verifyQueryResponse(histograms.size(), expected, body);
+        queryWithExpectedCode(
+                metricName,
+                1000 + histograms.size(),
+                aggregator,
+                aggParams,
+                200,
+                body -> verifyQueryResponse(histograms.size(), expected, body));
     }
 
     private void testAggregate(
@@ -492,9 +525,13 @@ public final class AggregationIT {
             postHistogramWithExpectedCode(metricName, i++, histogram, 204);
         }
 
-        final String body = queryWithExpectedCode(metricName, 1000 + histograms.size(), aggregator,
-                aggParams, 200);
-        verifyQueryResponse(histograms.size(), expected, body);
+        queryWithExpectedCode(
+                metricName,
+                1000 + histograms.size(),
+                aggregator,
+                aggParams,
+                200,
+                body -> verifyQueryResponse(histograms.size(), expected, body));
     }
 
     private void testAggregate(
@@ -510,9 +547,13 @@ public final class AggregationIT {
             postHistogramWithExpectedCode(metricName, i++, histogram, 204);
         }
 
-        final String body = queryWithExpectedCode(metricName, 1000 + histograms.size(), aggregator,
-                aggParams, 200);
-        verifyQueryResponse(histograms.size(), expected, body);
+        queryWithExpectedCode(
+                metricName,
+                1000 + histograms.size(),
+                aggregator,
+                aggParams,
+                200,
+                body -> verifyQueryResponse(histograms.size(), expected, body));
     }
 
     private void testAggregateToDoubles(
@@ -531,77 +572,92 @@ public final class AggregationIT {
             postHistogramWithExpectedCode(metricName, i++, histogram, 204);
         }
 
-        final String body = queryWithExpectedCode(metricName, 1000 + histograms.size(), 200,
+        queryWithExpectedCode(
+                metricName,
+                1000 + histograms.size(),
+                200,
+                body -> verifyQueryResponseDouble(histograms.size(), expected, body),
                 aggregators);
-        verifyQueryResponseDouble(histograms.size(), expected, body);
     }
 
     private void verifyQueryResponse(
             final int expectedSamples,
             final double expectedResult,
-            final String responseBody)
-            throws JSONException {
-        final JSONObject responseJson = new JSONObject(responseBody);
-        final JSONObject queryObject = responseJson.getJSONArray("queries").getJSONObject(0);
-        assertEquals(expectedSamples, queryObject.getInt("sample_size"));
-        final JSONArray result = queryObject.getJSONArray("results").getJSONObject(0).getJSONArray("values").getJSONArray(0);
-        assertEquals(1, result.getInt(0));
-        final double avg = result.getDouble(1);
-        assertEquals(expectedResult, avg, 0.000001);
+            final String responseBody) {
+        try {
+            final JSONObject responseJson = new JSONObject(responseBody);
+            final JSONObject queryObject = responseJson.getJSONArray("queries").getJSONObject(0);
+            assertEquals(expectedSamples, queryObject.getInt("sample_size"));
+            final JSONArray result = queryObject.getJSONArray("results").getJSONObject(0).getJSONArray("values").getJSONArray(0);
+            assertEquals(1, result.getInt(0));
+            final double avg = result.getDouble(1);
+            assertEquals(expectedResult, avg, 0.000001);
+        } catch (final JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void verifyQueryResponse(
             final int expectedSamples,
             final Histogram expectedResult,
-            final String responseBody)
-            throws JSONException {
-        final JSONObject responseJson = new JSONObject(responseBody);
-        final JSONObject queryObject = responseJson.getJSONArray("queries").getJSONObject(0);
-        assertEquals(expectedSamples, queryObject.getInt("sample_size"));
-        final JSONArray result = queryObject.getJSONArray("results").getJSONObject(0).getJSONArray("values").getJSONArray(0);
-        assertEquals(1, result.getInt(0));
-        final JSONObject histObject = result.getJSONObject(1);
-        final Histogram returnHistogram = new Histogram(histObject);
-        assertEquals(expectedResult, returnHistogram);
+            final String responseBody) {
+        try {
+            final JSONObject responseJson = new JSONObject(responseBody);
+            final JSONObject queryObject = responseJson.getJSONArray("queries").getJSONObject(0);
+            assertEquals(expectedSamples, queryObject.getInt("sample_size"));
+            final JSONArray result = queryObject.getJSONArray("results").getJSONObject(0).getJSONArray("values").getJSONArray(0);
+            assertEquals(1, result.getInt(0));
+            final JSONObject histObject = result.getJSONObject(1);
+            final Histogram returnHistogram = new Histogram(histObject);
+            assertEquals(expectedResult, returnHistogram);
+        } catch (final JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void verifyQueryResponse(
             final int expectedSamples,
             final List<Histogram> expectedResult,
-            final String responseBody)
-            throws JSONException {
-        final JSONObject responseJson = new JSONObject(responseBody);
-        final JSONObject queryObject = responseJson.getJSONArray("queries").getJSONObject(0);
-        assertEquals(expectedSamples, queryObject.getInt("sample_size"));
-        final JSONArray result = queryObject.getJSONArray("results")
-                .getJSONObject(0).getJSONArray("values");
+            final String responseBody) {
+        try {
+            final JSONObject responseJson = new JSONObject(responseBody);
+            final JSONObject queryObject = responseJson.getJSONArray("queries").getJSONObject(0);
+            assertEquals(expectedSamples, queryObject.getInt("sample_size"));
+            final JSONArray result = queryObject.getJSONArray("results")
+                    .getJSONObject(0).getJSONArray("values");
 
-        for (int i = 0; i < result.length(); i++) {
-            final JSONArray jsonPair = result.getJSONArray(i);
-            assertEquals(i + 1, jsonPair.getInt(0));
-            final Histogram actual = new Histogram(jsonPair.getJSONObject(1));
+            for (int i = 0; i < result.length(); i++) {
+                final JSONArray jsonPair = result.getJSONArray(i);
+                assertEquals(i + 1, jsonPair.getInt(0));
+                final Histogram actual = new Histogram(jsonPair.getJSONObject(1));
 
-            assertEquals(expectedResult.get(i), actual);
+                assertEquals(expectedResult.get(i), actual);
+            }
+        } catch (final JSONException e) {
+            throw new RuntimeException(e);
         }
     }
 
     private void verifyQueryResponseDouble(
             final int expectedSamples,
             final List<Double> expectedResult,
-            final String responseBody)
-            throws JSONException {
-        final JSONObject responseJson = new JSONObject(responseBody);
-        final JSONObject queryObject = responseJson.getJSONArray("queries").getJSONObject(0);
-        assertEquals(expectedSamples, queryObject.getInt("sample_size"));
-        final JSONArray result = queryObject.getJSONArray("results")
-                .getJSONObject(0).getJSONArray("values");
+            final String responseBody) {
+        try {
+            final JSONObject responseJson = new JSONObject(responseBody);
+            final JSONObject queryObject = responseJson.getJSONArray("queries").getJSONObject(0);
+            assertEquals(expectedSamples, queryObject.getInt("sample_size"));
+            final JSONArray result = queryObject.getJSONArray("results")
+                    .getJSONObject(0).getJSONArray("values");
 
-        assertEquals(expectedResult.size(), result.length());
-        for (int i = 0; i < result.length(); i++) {
-            final JSONArray jsonPair = result.getJSONArray(i);
-            assertEquals(i + 1, jsonPair.getInt(0));
-            final double actual = jsonPair.getDouble(1);
-            assertEquals(expectedResult.get(i), actual, 0.000001);
+            assertEquals(expectedResult.size(), result.length());
+            for (int i = 0; i < result.length(); i++) {
+                final JSONArray jsonPair = result.getJSONArray(i);
+                assertEquals(i + 1, jsonPair.getInt(0));
+                final double actual = jsonPair.getDouble(1);
+                assertEquals(expectedResult.get(i), actual, 0.000001);
+            }
+        } catch (final JSONException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -646,27 +702,46 @@ public final class AggregationIT {
         return prefix + "_test_" + UUID.randomUUID();
     }
 
-    private String queryWithExpectedCode(
+    private void queryWithExpectedCode(
             final String metricName,
             final long endTime,
             final String aggregator,
             final Map<String, ?> aggParams,
-            final int expectedCode)
-            throws JSONException, IOException {
-        return queryWithExpectedCode(metricName, endTime, expectedCode, new AggregatorAndParams(aggregator, aggParams));
+            final int expectedCode,
+            final Consumer<String> verifier) {
+        queryWithExpectedCode(metricName, endTime, expectedCode, verifier, new AggregatorAndParams(aggregator, aggParams));
     }
 
-    private String queryWithExpectedCode(
+    private void queryWithExpectedCode(
             final String metricName,
             final long endTime,
             final int expectedCode,
-            final AggregatorAndParams... aggregators)
-            throws JSONException, IOException {
-        final HttpPost queryRequest = KairosHelper.queryFor(1, endTime, metricName, aggregators);
-        try (CloseableHttpResponse lookupResponse = client.execute(queryRequest)) {
-            final String body = CharStreams.toString(new InputStreamReader(lookupResponse.getEntity().getContent(), Charsets.UTF_8));
-            assertEquals("response: " + body, expectedCode, lookupResponse.getStatusLine().getStatusCode());
-            return body;
+            final Consumer<String> verifier,
+            final AggregatorAndParams... aggregators) {
+        int remainingAttempts = 3;
+        while (true) {
+            try {
+                final HttpPost queryRequest = KairosHelper.queryFor(1, endTime, metricName, aggregators);
+                try (CloseableHttpResponse lookupResponse = client.execute(queryRequest)) {
+                    final String body = CharStreams.toString(
+                            new InputStreamReader(
+                                    lookupResponse.getEntity().getContent(),
+                                    Charsets.UTF_8));
+                    assertEquals("response: " + body, expectedCode, lookupResponse.getStatusLine().getStatusCode());
+                    verifier.accept(body);
+                }
+                return;
+            } catch (final AssertionError | Exception e) {
+                remainingAttempts--;
+                if (remainingAttempts == 0) {
+                    throw new RuntimeException(e);
+                }
+            }
+            try {
+                Thread.sleep(500);
+            } catch (final InterruptedException interruptedException) {
+                Thread.interrupted();
+            }
         }
     }
 }
