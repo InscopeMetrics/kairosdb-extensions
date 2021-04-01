@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM inscopemetrics/kairosdb:1.2.8
+FROM inscopemetrics/kairosdb:1.2.23
 
 MAINTAINER inscopemetrics
 
