@@ -76,7 +76,7 @@
 
     <!-- Provided by KairosDB
          NOTE: These need to be kept synchronized wrt version when KairosDB version changes -->
-    <apache.httpclient.version>4.3.6</apache.httpclient.version>
+    <apache.httpclient.version>4.5.13</apache.httpclient.version>
     <apache.httpcore.version>4.3.3</apache.httpcore.version>
     <arpnetworking.commons.version>1.20.0</arpnetworking.commons.version>
     <gson.version>2.2.4</gson.version>
