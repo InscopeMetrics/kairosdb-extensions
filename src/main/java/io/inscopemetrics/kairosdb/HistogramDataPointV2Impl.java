@@ -16,7 +16,6 @@
 package io.inscopemetrics.kairosdb;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import io.inscopemetrics.kairosdb.proto.v2.FormatV2;
 import org.json.JSONException;
@@ -27,6 +26,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 
 /**
  * DataPoint that represents a Histogram.
@@ -69,8 +69,8 @@ public class HistogramDataPointV2Impl extends DataPointHelper implements Histogr
         this.max = max;
         this.mean = mean;
         this.sum = sum;
-        countSupplier = Suppliers.memoize(this::computeSampleCount);
-        originalCountSupplier = Suppliers.memoize(countSupplier);
+        countSupplier = Suppliers.memoize(this::computeSampleCount)::get;
+        originalCountSupplier = Suppliers.memoize(countSupplier::get)::get;
     }
 
     /**
@@ -102,8 +102,8 @@ public class HistogramDataPointV2Impl extends DataPointHelper implements Histogr
         this.max = max;
         this.mean = mean;
         this.sum = sum;
-        countSupplier = Suppliers.memoize(this::computeSampleCount);
-        originalCountSupplier = Suppliers.ofInstance(originalCount);
+        countSupplier = Suppliers.memoize(this::computeSampleCount)::get;
+        originalCountSupplier = Suppliers.ofInstance(originalCount)::get;
     }
     // CHECKSTYLE.ON: ParameterNumber
 
@@ -149,10 +149,10 @@ public class HistogramDataPointV2Impl extends DataPointHelper implements Histogr
             writer.key(entry.getKey().toString()).value(entry.getValue());
         }
         writer.endObject();
-        writer.key("min").value(min);
-        writer.key("max").value(max);
-        writer.key("mean").value(mean);
-        writer.key("sum").value(sum);
+        writer.key("min").value(Double.isFinite(min) ? min : null);
+        writer.key("max").value(Double.isFinite(max) ? max : null);
+        writer.key("mean").value(Double.isFinite(mean) ? mean : null);
+        writer.key("sum").value(Double.isFinite(sum) ? sum : null);
         writer.key("precision").value(precision);
         writer.endObject();
     }

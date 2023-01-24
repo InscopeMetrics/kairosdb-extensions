@@ -15,11 +15,18 @@
  */
 package io.inscopemetrics.kairosdb;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import org.json.JSONException;
+import org.json.JSONWriter;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.TreeMap;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for the {@link HistogramDataPointV2Impl} class.
@@ -37,5 +44,33 @@ public class HistogramDataPointV2ImplTest {
         map.put(4d, 2147483647L);
         final HistogramDataPointV2Impl dp = new HistogramDataPointV2Impl(1, 7, map, -10, 10, 10, 10);
         assertEquals(8589934588L, dp.getSampleCount());
+    }
+
+    @Test
+    public void testInfiniteValuesSerializeAsNull() throws JSONException, IOException {
+        final TreeMap<Double, Long> map = new TreeMap<>();
+        map.put(1d, 1L);
+        map.put(2d, 1L);
+        map.put(3d, 1L);
+        map.put(4d, 1L);
+        final HistogramDataPointV2Impl dp = new HistogramDataPointV2Impl(
+                1,
+                7,
+                map,
+                Double.NEGATIVE_INFINITY,
+                Double.POSITIVE_INFINITY,
+                Double.NEGATIVE_INFINITY,
+                Double.POSITIVE_INFINITY);
+        assertEquals(4, dp.getSampleCount());
+        final StringWriter writer = new StringWriter();
+        final JSONWriter jsonWriter = new JSONWriter(writer);
+        dp.writeValueToJson(jsonWriter);
+        final Gson gson = new Gson();
+        final JsonObject result = gson.fromJson(writer.toString(), JsonObject.class);
+        assertTrue(result.get("min").isJsonNull());
+        assertTrue(result.get("max").isJsonNull());
+        assertTrue(result.get("mean").isJsonNull());
+        assertTrue(result.get("sum").isJsonNull());
+
     }
 }
