@@ -27,14 +27,14 @@ import org.kairosdb.core.aggregator.RangeAggregator;
 import org.kairosdb.core.annotation.FeatureComponent;
 import org.kairosdb.core.annotation.FeatureProperty;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 /**
  * Aggregator that computes a percentile of histograms.
@@ -45,19 +45,20 @@ import java.util.TreeMap;
         name = "merge",
         description = "Merges histograms.")
 public final class HistogramMergeAggregator extends RangeAggregator {
+    private static final int MAX_PRECISION = 52;
     private final AccumulatorFactory accumulatorFactory;
 
     @Valid
     @NotNull
     @Min(1)
-    @Max(52)
+    @Max(MAX_PRECISION)
     @FeatureProperty(
             name = "precision",
             label = "Precision",
             description = "Histogram precision in mantissa bits",
-            default_value = "64"
+            default_value = "52"
     )
-    private int precision = 52;
+    private int precision = MAX_PRECISION;
 
     /**
      * Public constructor.
@@ -98,8 +99,9 @@ public final class HistogramMergeAggregator extends RangeAggregator {
 
         @Override
         public Iterable<DataPoint> getNextDataPoints(final long returnTime, final Iterator<DataPoint> dataPointRange) {
+            int queryPrecision = HistogramMergeAggregator.this.precision;
             TreeMap<Double, Long> merged = Maps.newTreeMap();
-            HistogramKeyUtility keyUtility = HistogramKeyUtility.getInstance(precision);
+            HistogramKeyUtility keyUtility = HistogramKeyUtility.getInstance(queryPrecision);
             double min = Double.MAX_VALUE;
             double max = -Double.MAX_VALUE;
             long count = 0;
@@ -111,12 +113,12 @@ public final class HistogramMergeAggregator extends RangeAggregator {
                 if (dp instanceof HistogramDataPoint) {
                     final HistogramDataPoint hist = (HistogramDataPoint) dp;
 
-                    // If precision is less than our current precision, we need
+                    // If queryPrecision is less than our current queryPrecision, we need
                     // to down sample the values in the map to the lower
-                    // precision.
-                    if (hist.getPrecision() < precision) {
-                        precision = hist.getPrecision();
-                        final HistogramKeyUtility newKeyUtility = HistogramKeyUtility.getInstance(precision);
+                    // queryPrecision.
+                    if (hist.getPrecision() < queryPrecision) {
+                        queryPrecision = hist.getPrecision();
+                        final HistogramKeyUtility newKeyUtility = HistogramKeyUtility.getInstance(queryPrecision);
                         keyUtility = newKeyUtility;
 
                         final TreeMap<Double, Long> downsampled = Maps.newTreeMap();
@@ -124,7 +126,7 @@ public final class HistogramMergeAggregator extends RangeAggregator {
                             final Double mergedKey = entry.getKey();
                             final Long mergedValue = entry.getValue();
 
-                            // Since precision is decreasing multiple keys from
+                            // Since queryPrecision is decreasing multiple keys from
                             // merged may update the same bucket in downsampled
                             downsampled.merge(
                                 newKeyUtility.truncateToDouble(mergedKey),
@@ -136,8 +138,8 @@ public final class HistogramMergeAggregator extends RangeAggregator {
                     }
 
                     for (final Map.Entry<Double, Long> entry : hist.getMap().entrySet()) {
-                        // All we know is that precision is not going down but
-                        // the precision of hist may be larger than merged
+                        // All we know is that queryPrecision is not going down but
+                        // the queryPrecision of hist may be larger than merged
                         // so we need to truncate all the hist keys
                         merged.merge(
                                 keyUtility.truncateToDouble(entry.getKey()),
@@ -160,7 +162,7 @@ public final class HistogramMergeAggregator extends RangeAggregator {
             return Collections.singletonList(
                     new HistogramDataPointV2Impl(
                             returnTime,
-                            precision,
+                            queryPrecision,
                             merged,
                             min,
                             max,
