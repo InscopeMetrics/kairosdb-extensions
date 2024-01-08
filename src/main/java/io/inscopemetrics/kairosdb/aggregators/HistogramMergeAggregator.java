@@ -25,7 +25,12 @@ import io.inscopemetrics.kairosdb.accumulators.AccumulatorFactory;
 import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.aggregator.RangeAggregator;
 import org.kairosdb.core.annotation.FeatureComponent;
+import org.kairosdb.core.annotation.FeatureProperty;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
@@ -44,6 +49,18 @@ public final class HistogramMergeAggregator extends RangeAggregator {
     private static final int MAX_PRECISION = 64;
 
     private final AccumulatorFactory accumulatorFactory;
+
+    @Valid
+    @NotNull
+    @Min(1)
+    @Max(64)
+    @FeatureProperty(
+            name = "precision",
+            label = "Precision",
+            description = "Histogram precision in mantissa bits",
+            default_value = "64"
+    )
+    private int precision = -1;
 
     /**
      * Public constructor.
@@ -70,7 +87,11 @@ public final class HistogramMergeAggregator extends RangeAggregator {
         return HistogramDataPoint.GROUP_TYPE;
     }
 
-    private static final class HistogramMergeDataPointAggregator implements RangeSubAggregator {
+    public void setPrecision(final int precision) {
+        this.precision = precision;
+    }
+
+    private final class HistogramMergeDataPointAggregator implements RangeSubAggregator {
 
         private final AccumulatorFactory accumulatorFactory;
 
@@ -81,7 +102,6 @@ public final class HistogramMergeAggregator extends RangeAggregator {
         @Override
         public Iterable<DataPoint> getNextDataPoints(final long returnTime, final Iterator<DataPoint> dataPointRange) {
             TreeMap<Double, Long> merged = Maps.newTreeMap();
-            int precision = MAX_PRECISION;
             HistogramKeyUtility keyUtility = HistogramKeyUtility.getInstance(precision);
             double min = Double.MAX_VALUE;
             double max = -Double.MAX_VALUE;
