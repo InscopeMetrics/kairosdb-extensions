@@ -246,6 +246,23 @@ public final class AggregationIT {
     }
 
     @Test
+    public void testMergeAggregatorMultiExplicitPrecision() throws IOException, JSONException {
+        final List<Double> numbers = Lists.newArrayList();
+        for (Histogram histogram : MULTI_HIST_TEST_DATA) {
+            for (final Map.Entry<Double, Long> entry : histogram.getBins().entrySet()) {
+                for (int count = 0; count < entry.getValue(); count++) {
+                    numbers.add(entry.getKey());
+                }
+            }
+        }
+
+        final Histogram merged = new Histogram(numbers, (byte) 5);
+        final Map<String, Object> args = samplingParam();
+        args.put("precision", 5);
+        testAggregate("merge", MULTI_HIST_TEST_DATA, merged, args);
+    }
+
+    @Test
     public void testAggregateEmptyResults() {
         queryWithExpectedCode(
                 "non_existing_metric",
