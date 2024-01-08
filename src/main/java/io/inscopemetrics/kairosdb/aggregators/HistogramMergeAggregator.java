@@ -45,9 +45,6 @@ import java.util.TreeMap;
         name = "merge",
         description = "Merges histograms.")
 public final class HistogramMergeAggregator extends RangeAggregator {
-
-    private static final int MAX_PRECISION = 64;
-
     private final AccumulatorFactory accumulatorFactory;
 
     @Valid
