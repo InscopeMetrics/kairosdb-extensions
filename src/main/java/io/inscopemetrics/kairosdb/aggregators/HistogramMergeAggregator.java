@@ -50,14 +50,14 @@ public final class HistogramMergeAggregator extends RangeAggregator {
     @Valid
     @NotNull
     @Min(1)
-    @Max(64)
+    @Max(52)
     @FeatureProperty(
             name = "precision",
             label = "Precision",
             description = "Histogram precision in mantissa bits",
             default_value = "64"
     )
-    private int precision = -1;
+    private int precision = 52;
 
     /**
      * Public constructor.
