@@ -103,7 +103,7 @@
 
     <!-- Plugin Versions -->
     <docker.maven.plugin.version>0.33.0</docker.maven.plugin.version>
-    <maven.assembly.plugin.version>3.3.0</maven.assembly.plugin.version>
+    <maven.assembly.plugin.version>3.7.0</maven.assembly.plugin.version>
     <rpm.maven.plugin.version>2.2.0</rpm.maven.plugin.version>
 
     <!-- Code Coverage -->
