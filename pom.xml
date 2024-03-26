@@ -92,7 +92,7 @@
     <slf4j.version>1.7.2</slf4j.version>
 
     <!-- Test Dependency Versions -->
-    <apache.math3.version>3.2</apache.math3.version>
+    <apache.math3.version>3.6.1</apache.math3.version>
     <hamcrest.version>2.2</hamcrest.version>
     <junit.version>4.13.1</junit.version>
     <junit.benchmarks.version>0.7.2</junit.benchmarks.version>
