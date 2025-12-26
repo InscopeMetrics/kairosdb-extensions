@@ -28,7 +28,7 @@
   <packaging>jar</packaging>
   <name>KairosDB Extensions</name>
   <description>Extensions for KairosDB.</description>
-  <version>2.3.11-SNAPSHOT</version>
+  <version>2.3.11</version>
 
   <licenses>
     <license>
@@ -66,7 +66,7 @@
     <connection>scm:git:git@github.com:InscopeMetrics/kairosdb-extensions.git</connection>
     <developerConnection>scm:git:git@github.com:InscopeMetrics/kairosdb-extensions.git</developerConnection>
     <url>https://github.com/inscopemetrics/kairosdb-extensions</url>
-    <tag>kairosdb-extensions-2.3.8</tag>
+    <tag>kairosdb-extensions-2.3.11</tag>
   </scm>
 
   <properties>
