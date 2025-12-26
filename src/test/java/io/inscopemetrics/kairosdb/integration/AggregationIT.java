@@ -19,6 +19,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.CharStreams;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.inscopemetrics.kairosdb.Histogram;
 import io.inscopemetrics.kairosdb.KairosHelper;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -47,6 +48,7 @@ import static org.junit.Assert.assertEquals;
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
+@SuppressFBWarnings(value = "THROWS_METHOD_THROWS_RUNTIMEEXCEPTION", justification = "Integration test wrapping checked exceptions")
 public final class AggregationIT {
     private static final List<Histogram> SINGLE_HIST_TEST_DATA = Lists.newArrayList(
             new Histogram(Arrays.asList(1d, 3d, 5d, 7d, 9d, 1d, 9d, 1d, 9d)));

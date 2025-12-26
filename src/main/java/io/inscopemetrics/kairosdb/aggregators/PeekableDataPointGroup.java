@@ -15,6 +15,7 @@
  */
 package io.inscopemetrics.kairosdb.aggregators;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.kairosdb.core.DataPoint;
 import org.kairosdb.core.datastore.DataPointGroup;
 import org.kairosdb.core.groupby.GroupByResult;
@@ -78,6 +79,7 @@ public class PeekableDataPointGroup implements DataPointGroup {
      *
      * @return the next element
      */
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "DataPoint instances are effectively immutable")
     public DataPoint peek() {
         if (!havePeeked) {
             peeked = wrapped.next();

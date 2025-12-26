@@ -17,6 +17,7 @@ package io.inscopemetrics.kairosdb;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Suppliers;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.inscopemetrics.kairosdb.proto.v2.FormatV2;
 import org.json.JSONException;
 import org.json.JSONWriter;
@@ -54,6 +55,7 @@ public class HistogramDataPointV2Impl extends DataPointHelper implements Histogr
      * @param mean the mean value in the histogram
      * @param sum the sum of all the values in the histogram
      */
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Direct access to bins is part of the API contract for performance")
     public HistogramDataPointV2Impl(
             final long timestamp,
             final int precision,
@@ -86,6 +88,7 @@ public class HistogramDataPointV2Impl extends DataPointHelper implements Histogr
      * @param originalCount the original number of data points that this histogram represented
      */
     // CHECKSTYLE.OFF: ParameterNumber
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Direct access to bins is part of the API contract for performance")
     public HistogramDataPointV2Impl(
             final long timestamp,
             final int precision,
@@ -227,6 +230,7 @@ public class HistogramDataPointV2Impl extends DataPointHelper implements Histogr
     }
 
     @Override
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Direct access to bins is part of the API contract for performance")
     public TreeMap<Double, Long> getMap() {
         return map;
     }

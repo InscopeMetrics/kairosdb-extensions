@@ -15,6 +15,7 @@
  */
 package io.inscopemetrics.kairosdb.aggregators;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.inscopemetrics.kairosdb.DelegatingRangeAggregatorMap;
 import org.joda.time.DateTimeZone;
 import org.kairosdb.core.DataPoint;
@@ -63,6 +64,7 @@ public class DelegatingRangeAggregator extends RangeAggregator {
     }
 
     @Override
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "DateTimeZone is immutable")
     public void setTimeZone(final DateTimeZone timeZone) {
         this.timeZone = timeZone;
         super.setTimeZone(timeZone);

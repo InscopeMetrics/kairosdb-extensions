@@ -89,7 +89,7 @@ public class ListDataPointGroup extends AbstractDataPointGroup {
 
     }
 
-    private static class DataPointComparator implements Comparator<DataPoint>, Serializable {
+    private static final class DataPointComparator implements Comparator<DataPoint>, Serializable {
 
         private static final long serialVersionUID = -3986265694230498036L;
 

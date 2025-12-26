@@ -95,6 +95,7 @@ public class MovingWindowAggregator extends RangeAggregator {
     }
 
     @Override
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "DateTimeZone is immutable")
     public void setTimeZone(final DateTimeZone timeZone) {
         this.timeZone = timeZone;
         super.setTimeZone(timeZone);

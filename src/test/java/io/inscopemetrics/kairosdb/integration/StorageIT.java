@@ -17,6 +17,7 @@ package io.inscopemetrics.kairosdb.integration;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.inscopemetrics.kairosdb.Histogram;
 import io.inscopemetrics.kairosdb.KairosHelper;
 import org.apache.http.client.methods.HttpPost;
@@ -38,6 +39,7 @@ import static org.junit.Assert.assertEquals;
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
+@SuppressFBWarnings(value = "THROWS_METHOD_THROWS_RUNTIMEEXCEPTION", justification = "Integration test wrapping checked exceptions")
 public final class StorageIT {
     private final CloseableHttpClient client = HttpClients.createDefault();
 

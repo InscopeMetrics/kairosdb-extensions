@@ -15,6 +15,7 @@
  */
 package io.inscopemetrics.kairosdb;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -36,6 +37,7 @@ import java.util.function.Consumer;
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot io)
  */
+@SuppressFBWarnings(value = "THROWS_METHOD_THROWS_RUNTIMEEXCEPTION", justification = "Test utility wrapping checked exceptions")
 public final class KairosHelper {
     private static final int QUERY_ATTEMPTS = 3;
     private static final long QUERY_ATTEMPT_INTERVAL_MILLIS = 500;

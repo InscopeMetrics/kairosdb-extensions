@@ -15,6 +15,8 @@
  */
 package org.kairosdb.testing;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -34,7 +36,7 @@ public class AggregatorAndParams {
      */
     public AggregatorAndParams(final String aggregator, final Map<String, ?> params) {
         this.aggregator = aggregator;
-        this.params = params;
+        this.params = new HashMap<>(params);
     }
 
     public final String getAggregator() {
@@ -42,6 +44,6 @@ public class AggregatorAndParams {
     }
 
     public final Map<String, ?> getParams() {
-        return params;
+        return Collections.unmodifiableMap(params);
     }
 }

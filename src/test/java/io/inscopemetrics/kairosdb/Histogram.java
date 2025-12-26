@@ -87,6 +87,7 @@ public class Histogram {
      * @throws JSONException on any JSON processing errors.
      */
     @SuppressWarnings("unchecked")
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW", justification = "Test helper with acceptable risk")
     public Histogram(final JSONObject json) throws JSONException {
         min = json.getDouble("min");
         max = json.getDouble("max");
@@ -183,6 +184,7 @@ public class Histogram {
         return precision;
     }
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Test helper intentionally exposes internal state")
     public TreeMap<Double, Long> getBins() {
         return bins;
     }

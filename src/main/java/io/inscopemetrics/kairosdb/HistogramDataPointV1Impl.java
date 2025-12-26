@@ -38,7 +38,6 @@ import java.util.TreeMap;
 public class HistogramDataPointV1Impl extends DataPointHelper implements HistogramDataPoint {
     private static final int DEFAULT_PRECISION = 7;
 
-    @SuppressFBWarnings("URF_UNREAD_FIELD")
     private final int precision;
     private final TreeMap<Double, Long> map;
     private final double min;
@@ -115,6 +114,7 @@ public class HistogramDataPointV1Impl extends DataPointHelper implements Histogr
      * @param mean the mean value in the histogram
      * @param sum the sum of all the values in the histogram
      */
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Direct access to bins is part of the API contract for performance")
     public HistogramDataPointV1Impl(
             final long timestamp,
             final int precision,
@@ -130,7 +130,12 @@ public class HistogramDataPointV1Impl extends DataPointHelper implements Histogr
         this.max = max;
         this.mean = mean;
         this.sum = sum;
-        this.originalCount = getSampleCount();
+        // Inline getSampleCount() to avoid 'this' escape before full initialization
+        long count = 0;
+        for (final Long binSamples : map.values()) {
+            count += binSamples;
+        }
+        this.originalCount = count;
     }
 
 
@@ -147,6 +152,7 @@ public class HistogramDataPointV1Impl extends DataPointHelper implements Histogr
      * @param originalCount the original number of data points that this histogram represented
      */
     // CHECKSTYLE.OFF: ParameterNumber
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Direct access to bins is part of the API contract for performance")
     public HistogramDataPointV1Impl(
             final long timestamp,
             final int precision,
@@ -268,6 +274,7 @@ public class HistogramDataPointV1Impl extends DataPointHelper implements Histogr
     }
 
     @Override
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Direct access to bins is part of the API contract for performance")
     public TreeMap<Double, Long> getMap() {
         return map;
     }

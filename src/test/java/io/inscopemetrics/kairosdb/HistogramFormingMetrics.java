@@ -19,6 +19,7 @@ import com.arpnetworking.metrics.Counter;
 import com.arpnetworking.metrics.Metrics;
 import com.arpnetworking.metrics.Timer;
 import com.google.common.collect.Maps;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.time.Instant;
 import java.util.Map;
@@ -30,6 +31,7 @@ import javax.annotation.Nullable;
  *
  * @author Brandon Arp (brandon dot arp at inscopemetrics dot com)
  */
+@SuppressFBWarnings(value = "THROWS_METHOD_THROWS_RUNTIMEEXCEPTION", justification = "Test utility with stub methods")
 public class HistogramFormingMetrics implements Metrics {
 
     private final int precision;
@@ -37,7 +39,7 @@ public class HistogramFormingMetrics implements Metrics {
     private Double sum = 0d;
     private Double max;
     private Double min;
-    private int count;
+    private long count;
 
     /**
      * Public constructor.
@@ -140,6 +142,7 @@ public class HistogramFormingMetrics implements Metrics {
         return null;
     }
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Test utility intentionally exposes internal state")
     public Map<Double, Long> getHistogram() {
         return histogram;
     }

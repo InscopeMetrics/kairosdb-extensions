@@ -17,6 +17,7 @@ package io.inscopemetrics.kairosdb.accumulators;
 
 import com.arpnetworking.commons.math.Accumulator;
 import com.google.common.base.MoreObjects;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Factory which creates an {@link Accumulator} instance from a {@link Class}.
@@ -37,10 +38,11 @@ public final class AccumulatorFromClassFactory implements AccumulatorFactory {
     }
 
     @Override
+    @SuppressFBWarnings(value = "THROWS_METHOD_THROWS_RUNTIMEEXCEPTION", justification = "Wrapping reflection exceptions as unchecked")
     public Accumulator create() {
         try {
-            return accumulatorClass.newInstance();
-        } catch (final InstantiationException | IllegalAccessException e) {
+            return accumulatorClass.getDeclaredConstructor().newInstance();
+        } catch (final ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
     }

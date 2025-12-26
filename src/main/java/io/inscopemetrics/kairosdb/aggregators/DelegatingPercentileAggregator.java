@@ -16,6 +16,7 @@
 package io.inscopemetrics.kairosdb.aggregators;
 
 import com.google.inject.Inject;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.inscopemetrics.kairosdb.DelegatingRangeAggregatorMap;
 import org.kairosdb.core.aggregator.PercentileAggregator;
 import org.kairosdb.core.aggregator.RangeAggregator;
@@ -54,6 +55,7 @@ public final class DelegatingPercentileAggregator extends DelegatingRangeAggrega
     }
 
     @Override
+    @SuppressFBWarnings(value = "THROWS_METHOD_THROWS_RUNTIMEEXCEPTION", justification = "Wrapping reflection exceptions as unchecked")
     protected void setProperties(final RangeAggregator aggregator) {
         super.setProperties(aggregator);
         if (aggregator instanceof HistogramPercentileAggregator) {

@@ -15,6 +15,7 @@
  */
 package io.inscopemetrics.kairosdb;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -28,6 +29,7 @@ import static org.junit.Assert.assertTrue;
 public final class HistogramKeyUtilityTest {
 
     @Test
+    @SuppressFBWarnings(value = "FL_FLOATS_AS_LOOP_COUNTERS", justification = "Intentional use for testing at specific intervals")
     public void packAndUnpack() {
         final int precision = 7;
         final HistogramKeyUtility keyUtility = HistogramKeyUtility.getInstance(precision);

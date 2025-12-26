@@ -264,7 +264,7 @@ public class HistogramFilterAggregator implements Aggregator {
                 case EQUAL:
                     return filterinc == FilterIndeterminate.KEEP // Keeping the bin where EQUAL matches cannot change the histogram
                             || threshold < hist.getMin()
-                            || (hist.getMax() < threshold && filterinc == FilterIndeterminate.DISCARD);
+                            || hist.getMax() < threshold && filterinc == FilterIndeterminate.DISCARD;
                 default:
                     throw new IllegalStateException("Unsupported FilterOp Enum type");
             }
